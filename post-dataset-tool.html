@@ -540,7 +540,7 @@ body {
         return 'https://api.github.com/repos/' + ghSettings.owner + '/' + ghSettings.repo + '/contents/';
     }
 
-    // UTF-8 string to base64 (supports Chinese, emoji, etc.)
+    // UTF-8 string to base64 — chunked to avoid stack overflow on large content
     function utf8ToBase64(str) {
         var bytes = [];
         for (var i = 0; i < str.length; i++) {
@@ -558,11 +558,22 @@ body {
                 bytes.push(0xf0 | (code >> 18), 0x80 | ((code >> 12) & 0x3f), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
             }
         }
-        return btoa(String.fromCharCode.apply(null, bytes));
+        // Chunk to avoid "Maximum call stack size exceeded"
+        var CHUNK = 0x8000; // 32768
+        var parts = [];
+        for (var j = 0; j < bytes.length; j += CHUNK) {
+            var chunk = bytes.slice(j, j + CHUNK);
+            parts.push(String.fromCharCode.apply(null, chunk));
+        }
+        return btoa(parts.join(''));
     }
 
     async function githubAPI(method, filePath, content, sha, message) {
-        if (!isGHConfigured()) throw new Error('GitHub not configured. Please open Settings and add your token.');
+        if (!isGHConfigured()) throw new Error('GitHub not configured. Open Settings (top-right gear) and paste your GitHub token.');
+
+        // Trim token — copy-paste often adds whitespace
+        ghSettings.token = ghSettings.token.trim();
+        saveSettings(ghSettings);
 
         var url = ghApiBase() + filePath;
         var body = {
@@ -576,29 +587,38 @@ body {
 
         var reqBody = method === 'DELETE' ? JSON.stringify({ message: body.message, sha: sha, branch: body.branch }) : JSON.stringify(body);
 
-        console.log('GitHub API:', method, url, '(sha:', sha || 'none', 'content length:', content ? content.length : 0, ')');
+        console.log('GitHub API:', method, url, 'content size:', content ? content.length : 0, 'sha:', sha || 'none');
 
-        var resp = await fetch(url, {
-            method: method,
-            headers: {
-                'Authorization': 'Bearer ' + ghSettings.token,
-                'Accept': 'application/vnd.github+json',
-                'Content-Type': 'application/json'
-            },
-            body: reqBody
-        });
+        var resp;
+        try {
+            resp = await fetch(url, {
+                method: method,
+                headers: {
+                    'Authorization': 'Bearer ' + ghSettings.token,
+                    'Accept': 'application/vnd.github+json',
+                    'Content-Type': 'application/json'
+                },
+                body: reqBody
+            });
+        } catch (fetchErr) {
+            console.error('Fetch failed:', fetchErr);
+            throw new Error('Network error: ' + fetchErr.message + '. Check your internet, or the token may have invalid characters.');
+        }
 
         var data;
-        try { data = await resp.json(); } catch (e) { data = {}; }
+        try {
+            var text = await resp.text();
+            try { data = JSON.parse(text); } catch (e) { data = { message: text }; }
+        } catch (e) { data = {}; }
+
+        console.log('GitHub response:', resp.status, data.message || '');
 
         if (!resp.ok) {
-            console.error('GitHub API error:', resp.status, data);
             var errMsg = data.message || ('HTTP ' + resp.status);
-            if (resp.status === 401) errMsg = 'Bad token (401). Go to Settings and re-paste your GitHub token. Make sure it has "repo" scope.';
-            if (resp.status === 403) errMsg = 'Forbidden (403). Token may lack permissions. Make sure it has "repo" scope, not just "public_repo".';
-            if (resp.status === 404) errMsg = 'Not found (404): ' + filePath + '. Check repo name in Settings.';
-            if (resp.status === 409) errMsg = 'Conflict (409): file may have been modified externally. Refresh and try again.';
-            if (resp.status === 422) errMsg = 'Validation failed: ' + (data.message || 'check file content and path.');
+            if (resp.status === 401) errMsg = 'Bad token (401). Make sure you created a Classic token with "repo" scope, and paste it correctly.';
+            if (resp.status === 403) errMsg = 'Forbidden (403). Check that your Classic token has "repo" scope (not just "public_repo").';
+            if (resp.status === 404) errMsg = 'Not found (404). Check Repository Owner/Name in Settings. Expected: Weil1nKONG / Weil1nKONG.github.io';
+            if (resp.status === 422) errMsg = 'Validation error (422): ' + (data.message || 'check file path and content.');
             throw new Error(errMsg);
         }
         return data;

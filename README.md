@@ -8,10 +8,11 @@ A self-contained HTML tool for creating and publishing posts to GitHub Pages. Bu
 
 ## Features
 
-- Write posts with title, author, content, and a **customizable publish time** (core feature)
+- Write posts with title, author, content, group category, and a **customizable publish time** (core feature)
 - One-click **publish to GitHub Pages** via GitHub API
 - Each post becomes a standalone HTML page at `posts/{slug}.html`
-- Auto-generated post index at `/posts/`
+- **Group posts by category** — filter in the manager, index page organizes by group
+- Auto-generated post index at `/posts/` — grouped by category
 - Edit, update, unpublish, or delete posts
 - Local draft mode with localStorage persistence
 - Export/import dataset as HTML with embedded JSON
@@ -35,7 +36,7 @@ https://weil1nkong.github.io/post-dataset-tool.html
 
 ### 3. Create & Publish
 
-1. Fill in Title, Author, Content
+1. Fill in Title, Author, Group (e.g. Tech, Research, Cooking), Content
 2. Set the Publish Time (can be any past or future date)
 3. Click **Save Locally** (saves as draft)
 4. Click **Publish to GitHub** (live on the internet)
@@ -48,20 +49,20 @@ https://weil1nkong.github.io/post-dataset-tool.html
 +-------------------------------+---------------------------+
 |  Post Dataset Manager         |  3 posts (2 published)    |
 +-------------------------------+---------------------------+
-|  [Search...]  [Sort: Newest]  |  New Post / Edit Post      |
+|  [Search...] [Sort][Group v]  |  New Post / Edit Post      |
 |                               |                            |
 |  +-- Post Card (Draft) --+    |  Title: [............]     |
 |  | Title           Time  |    |  Slug:  [............]     |
-|  | [Draft] Author  Date  |    |  Author:[............]     |
-|  | Preview text...       |    |  Content:                 |
-|  +-----------------------+    |  [..................]     |
-|                               |  Publish Time: [picker]    |
-|  +-- Post Card (Published)-+  |  [Update]                  |
-|  | Title           Time   |   |                            |
-|  | [Published] Author Date|   |  [Save Locally] [New]      |
-|  | Preview text...        |   |  [Publish to GitHub]       |
-|  +------------------------+   |  [Unpublish] [Delete]      |
-|                               |                            |
+|  | [Draft][Tech] Author  |    |  Author:[............]     |
+|  | Preview text...       |    |  Group: [............]     |
+|  +-----------------------+    |  Content:                 |
+|                               |  [..................]     |
+|  +-- Post Card (Published)-+  |  Publish Time: [picker]    |
+|  | Title           Time   |   |  [Update]                  |
+|  | [Published][Research]  |   |                            |
+|  | Preview text...        |   |  [Save Locally] [New]      |
+|  +------------------------+   |  [Publish to GitHub]       |
+|                               |  [Unpublish] [Delete]      |
 +-------------------------------+---------------------------+
 |  Tip text   [Export] [Import] [Clear All]                   |
 +------------------------------------------------------------+
@@ -103,6 +104,7 @@ Each post is stored as JSON:
   "title":         "Best Laptops for Students",
   "slug":          "best-laptops-for-students",
   "author":        "TechReview",
+  "group":         "Tech",
   "content":       "After testing 20 laptops...",
   "publishTime":   "2025-01-01T09:00",
   "createdAt":     "2026-06-14T15:30",
@@ -164,4 +166,6 @@ dataset/
 - Data is stored in your browser's `localStorage` — different browsers/devices have separate data
 - The GitHub token is also stored in localStorage — never commit it to git
 - Published posts live at `https://weil1nkong.github.io/posts/{slug}.html`
-- The post index is at `https://weil1nkong.github.io/posts/`
+- The post index is at `https://weil1nkong.github.io/posts/` — organized by group
+- Group is a free-text field; preset suggestions include Tech, Research, Cooking, Life, News, Other
+- Filter posts by group using the dropdown in the search bar

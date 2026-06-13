@@ -540,6 +540,27 @@ body {
         return 'https://api.github.com/repos/' + ghSettings.owner + '/' + ghSettings.repo + '/contents/';
     }
 
+    // UTF-8 string to base64 (supports Chinese, emoji, etc.)
+    function utf8ToBase64(str) {
+        var bytes = [];
+        for (var i = 0; i < str.length; i++) {
+            var c = str.charCodeAt(i);
+            if (c < 0x80) {
+                bytes.push(c);
+            } else if (c < 0x800) {
+                bytes.push(0xc0 | (c >> 6), 0x80 | (c & 0x3f));
+            } else if (c < 0xd800 || c >= 0xe000) {
+                bytes.push(0xe0 | (c >> 12), 0x80 | ((c >> 6) & 0x3f), 0x80 | (c & 0x3f));
+            } else {
+                // Surrogate pair (emoji etc.)
+                i++;
+                var code = 0x10000 + ((c & 0x3ff) << 10) + (str.charCodeAt(i) & 0x3ff);
+                bytes.push(0xf0 | (code >> 18), 0x80 | ((code >> 12) & 0x3f), 0x80 | ((code >> 6) & 0x3f), 0x80 | (code & 0x3f));
+            }
+        }
+        return btoa(String.fromCharCode.apply(null, bytes));
+    }
+
     async function githubAPI(method, filePath, content, sha, message) {
         if (!isGHConfigured()) throw new Error('GitHub not configured. Please open Settings and add your token.');
 
@@ -549,9 +570,13 @@ body {
             branch: ghSettings.branch
         };
         if (content !== null && content !== undefined) {
-            body.content = btoa(unescape(encodeURIComponent(content)));
+            body.content = utf8ToBase64(content);
         }
         if (sha) body.sha = sha;
+
+        var reqBody = method === 'DELETE' ? JSON.stringify({ message: body.message, sha: sha, branch: body.branch }) : JSON.stringify(body);
+
+        console.log('GitHub API:', method, url, '(sha:', sha || 'none', 'content length:', content ? content.length : 0, ')');
 
         var resp = await fetch(url, {
             method: method,
@@ -560,19 +585,23 @@ body {
                 'Accept': 'application/vnd.github+json',
                 'Content-Type': 'application/json'
             },
-            body: method === 'DELETE' ? (sha ? JSON.stringify({ message: body.message, sha: sha, branch: body.branch }) : null) : JSON.stringify(body)
+            body: reqBody
         });
 
-        var data = await resp.json();
+        var data;
+        try { data = await resp.json(); } catch (e) { data = {}; }
+
         if (!resp.ok) {
+            console.error('GitHub API error:', resp.status, data);
             var errMsg = data.message || ('HTTP ' + resp.status);
-            if (resp.status === 401) errMsg = 'Invalid token. Please check your GitHub token in Settings.';
-            if (resp.status === 404) errMsg = 'File not found on GitHub: ' + filePath;
-            if (resp.status === 409) errMsg = 'Conflict: file may have been modified externally. Try refreshing.';
-            if (resp.status === 422) errMsg = 'Invalid data: ' + (data.message || 'check repository settings.');
+            if (resp.status === 401) errMsg = 'Bad token (401). Go to Settings and re-paste your GitHub token. Make sure it has "repo" scope.';
+            if (resp.status === 403) errMsg = 'Forbidden (403). Token may lack permissions. Make sure it has "repo" scope, not just "public_repo".';
+            if (resp.status === 404) errMsg = 'Not found (404): ' + filePath + '. Check repo name in Settings.';
+            if (resp.status === 409) errMsg = 'Conflict (409): file may have been modified externally. Refresh and try again.';
+            if (resp.status === 422) errMsg = 'Validation failed: ' + (data.message || 'check file content and path.');
             throw new Error(errMsg);
         }
-        return data; // { content: { sha, ... }, commit: {...} }
+        return data;
     }
 
     async function ghGetFile(filePath) {

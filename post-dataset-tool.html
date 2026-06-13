@@ -66,6 +66,10 @@ body {
 .publish-badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; font-weight: 600; }
 .publish-badge.published { background: rgba(39, 174, 96, 0.12); color: var(--success); }
 .publish-badge.draft { background: rgba(230, 126, 34, 0.12); color: var(--warning); }
+.group-badge {
+    font-size: 0.73rem; padding: 2px 8px; border-radius: 10px; font-weight: 600;
+    background: rgba(79, 110, 246, 0.08); color: var(--primary);
+}
 .edit-panel {
     width: 440px; flex-shrink: 0; background: var(--card-bg); border-radius: var(--radius);
     box-shadow: var(--shadow); padding: 24px; display: flex; flex-direction: column;
@@ -202,6 +206,9 @@ body {
                 <option value="oldest">Publish Time (Oldest)</option>
                 <option value="created">Created Time</option>
             </select>
+            <select id="groupFilter">
+                <option value="">All Groups</option>
+            </select>
         </div>
         <div class="post-list" id="postList">
             <div class="empty-state">
@@ -230,6 +237,19 @@ body {
         <div class="form-group">
             <label>Author</label>
             <input type="text" id="authorInput" placeholder="Enter author name...">
+        </div>
+
+        <div class="form-group">
+            <label>Group</label>
+            <input type="text" id="groupInput" list="groupPresets" placeholder="e.g. Tech, Research, Cooking...">
+            <datalist id="groupPresets">
+                <option value="Tech">
+                <option value="Research">
+                <option value="Cooking">
+                <option value="Life">
+                <option value="News">
+                <option value="Other">
+            </datalist>
         </div>
 
         <div class="form-group">
@@ -369,6 +389,7 @@ body {
         if (p.published === undefined) { p.published = false; m = true; }
         if (p.publishedUrl === undefined) { p.publishedUrl = ''; m = true; }
         if (p.publishedSha === undefined) { p.publishedSha = ''; m = true; }
+        if (p.group === undefined) { p.group = ''; m = true; }
     });
     if (m) savePosts(posts);
 
@@ -380,6 +401,8 @@ body {
     var $slugInput = document.getElementById('slugInput');
     var $authorInput = document.getElementById('authorInput');
     var $contentInput = document.getElementById('contentInput');
+    var $groupInput = document.getElementById('groupInput');
+    var $groupFilter = document.getElementById('groupFilter');
     var $publishTimeInput = document.getElementById('publishTimeInput');
     var $timeDisplay = document.getElementById('timeDisplay');
     var $btnSave = document.getElementById('btnSave');
@@ -519,7 +542,9 @@ body {
             'footer{margin-top:40px;text-align:center;font-size:.8rem;color:#999}\nfooter a{color:#4f6ef6;text-decoration:none}\n'+
             '</style>\n</head>\n<body>\n<article>\n'+
             '  <h1>'+escapeHtml(post.title)+'</h1>\n'+
-            '  <div class="meta">\n    <span>By '+escapeHtml(post.author||'Anonymous')+'</span>\n'+
+            '  <div class="meta">\n'+
+            (post.group ? '    <span class="post-group">'+escapeHtml(post.group)+'</span>\n' : '')+
+            '    <span>By '+escapeHtml(post.author||'Anonymous')+'</span>\n'+
             '    <time datetime="'+escapeHtml(post.publishTime)+'">Published: '+formatTime(post.publishTime)+'</time>\n  </div>\n'+
             '  <div class="content">'+escapeHtml(post.content).replace(/\n/g,'<br>\n')+'</div>\n</article>\n'+
             '<footer><p><a href="/posts/">Back to all posts</a></p></footer>\n'+
@@ -527,17 +552,33 @@ body {
     }
 
     function generateIndexPageHTML(publishedPosts) {
-        var items = '';
+        // Group posts
+        var groups = {};
+        var groupOrder = [];
         publishedPosts.forEach(function(p) {
-            items += '      <li>\n        <a href="./'+escapeHtml(p.slug)+'.html">\n'+
-                '          <h3>'+escapeHtml(p.title)+'</h3>\n'+
-                '          <span class="idx-meta">'+escapeHtml(p.author||'Anonymous')+' &middot; <time datetime="'+escapeHtml(p.publishTime)+'">'+formatTime(p.publishTime)+'</time></span>\n'+
-                '          <p>'+escapeHtml(truncateText(p.content,120))+'</p>\n        </a>\n      </li>\n';
+            var g = p.group || 'Uncategorized';
+            if (!groups[g]) { groups[g] = []; groupOrder.push(g); }
+            groups[g].push(p);
         });
+
+        var items = '';
+        groupOrder.forEach(function(g) {
+            items += '    <h2>'+escapeHtml(g)+' <span style="font-weight:400;font-size:0.8rem;color:#7f8c8d;">('+groups[g].length+' posts)</span></h2>\n';
+            items += '    <ul>\n';
+            groups[g].forEach(function(p) {
+                items += '      <li>\n        <a href="./'+escapeHtml(p.slug)+'.html">\n'+
+                    '          <h3>'+escapeHtml(p.title)+'</h3>\n'+
+                    '          <span class="idx-meta">'+escapeHtml(p.author||'Anonymous')+' &middot; <time datetime="'+escapeHtml(p.publishTime)+'">'+formatTime(p.publishTime)+'</time></span>\n'+
+                    '          <p>'+escapeHtml(truncateText(p.content,120))+'</p>\n        </a>\n      </li>\n';
+            });
+            items += '    </ul>\n';
+        });
+
         return '<!DOCTYPE html>\n<html lang="en">\n<head>\n<meta charset="UTF-8">\n<title>Posts Index</title>\n'+
             '<style>\n'+
             'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;max-width:800px;margin:40px auto;padding:20px;background:#f9fafb;color:#2c3e50;line-height:1.7}\n'+
             'h1{color:#4f6ef6;border-bottom:3px solid #4f6ef6;padding-bottom:12px}\n'+
+            'h2{color:#2c3e50;margin:28px 0 10px;font-size:1.2rem}\n'+
             '.info{background:#eef0fd;padding:14px 18px;border-radius:8px;margin-bottom:24px;font-size:.85rem;color:#555}\n'+
             'ul{list-style:none;padding:0}li{margin-bottom:14px}\n'+
             'li a{display:block;background:#fff;border:1px solid #e1e5ea;border-radius:10px;padding:18px 22px;text-decoration:none;color:inherit;box-shadow:0 2px 6px rgba(0,0,0,0.03);transition:0.2s}\n'+
@@ -545,8 +586,8 @@ body {
             'li h3{margin:0 0 6px;font-size:1.1rem;color:#2c3e50}\n.idx-meta{font-size:.8rem;color:#7f8c8d}\n'+
             '.idx-meta time{color:#4f6ef6;font-weight:600}\nli p{margin:8px 0 0;font-size:.88rem;color:#666}\n'+
             'footer{margin-top:40px;text-align:center;font-size:.8rem;color:#999}\n</style>\n</head>\n<body>\n'+
-            '<h1>Posts Index</h1>\n<div class="info"><strong>'+publishedPosts.length+'</strong> posts published &middot; Updated: '+formatTime(new Date().toISOString())+'</div>\n'+
-            '<ul>\n'+items+'</ul>\n<footer>Generated by Post Dataset Manager</footer>\n</body>\n</html>';
+            '<h1>Posts Index</h1>\n<div class="info"><strong>'+publishedPosts.length+'</strong> posts published &middot; '+groupOrder.length+' groups &middot; Updated: '+formatTime(new Date().toISOString())+'</div>\n'+
+            items+'\n<footer>Generated by Post Dataset Manager</footer>\n</body>\n</html>';
     }
 
     // ==================== Publish / Unpublish ====================
@@ -598,6 +639,7 @@ body {
         if (!post||!post.published) { showToast('Post is not published yet.', 'error'); return; }
         post.title = $titleInput.value.trim();
         post.author = $authorInput.value.trim();
+        post.group = $groupInput.value.trim();
         post.content = $contentInput.value.trim();
         post.slug = $slugInput.value.trim()||generateSlug(post.title);
         post.publishTime = $publishTimeInput.value||nowISO();
@@ -667,6 +709,7 @@ body {
             for (var i=0;i<posts.length;i++) {
                 if (posts[i].id===currentPostId) {
                     posts[i].title=title; posts[i].slug=slug; posts[i].author=$authorInput.value.trim();
+                    posts[i].group=$groupInput.value.trim();
                     posts[i].content=content; posts[i].publishTime=pt; posts[i].updatedAt=now; break;
                 }
             }
@@ -674,7 +717,7 @@ body {
             showToast('Post saved locally', 'success');
         } else {
             var np = { id:generateId(), title:title, slug:slug, author:$authorInput.value.trim(),
-                content:content, publishTime:pt, createdAt:now, updatedAt:now,
+                group:$groupInput.value.trim(), content:content, publishTime:pt, createdAt:now, updatedAt:now,
                 published:false, publishedUrl:'', publishedSha:'' };
             posts.push(np);
             savePosts(posts);
@@ -742,13 +785,19 @@ body {
     // ==================== Render ====================
     function getFilteredAndSortedPosts() {
         var result = posts.slice();
+        // Keyword search
         if (currentFilter.trim()) {
             var kw = currentFilter.trim().toLowerCase();
             result = result.filter(function(p) {
                 return (p.title&&p.title.toLowerCase().indexOf(kw)!==-1)||
                        (p.author&&p.author.toLowerCase().indexOf(kw)!==-1)||
-                       (p.content&&p.content.toLowerCase().indexOf(kw)!==-1);
+                       (p.content&&p.content.toLowerCase().indexOf(kw)!==-1)||
+                       (p.group&&p.group.toLowerCase().indexOf(kw)!==-1);
             });
+        }
+        // Group filter
+        if ($groupFilter && $groupFilter.value) {
+            result = result.filter(function(p) { return p.group === $groupFilter.value; });
         }
         if (currentSort==='newest') result.sort(function(a,b){return(b.publishTime||'').localeCompare(a.publishTime||'');});
         else if (currentSort==='oldest') result.sort(function(a,b){return(a.publishTime||'').localeCompare(b.publishTime||'');});
@@ -771,6 +820,7 @@ body {
                 html += '<div class="post-card-meta">';
                 if (p.published) html += '<span class="publish-badge published">[Published]</span>';
                 else html += '<span class="publish-badge draft">[Draft]</span>';
+                if (p.group) html += '<span class="group-badge">'+escapeHtml(p.group)+'</span>';
                 html += '<span>By '+escapeHtml(p.author||'Anonymous')+'</span>';
                 html += '<span>Created: '+formatTime(p.createdAt)+'</span></div>';
                 html += '<div class="post-card-preview">'+escapeHtml(truncateText(p.content,80))+'</div></div>';
@@ -778,6 +828,18 @@ body {
             $postList.innerHTML = html;
         }
         updateStats();
+        updateGroupFilter();
+    }
+
+    function updateGroupFilter() {
+        var groups = {};
+        posts.forEach(function(p) { if (p.group) groups[p.group] = true; });
+        var currentVal = $groupFilter.value;
+        $groupFilter.innerHTML = '<option value="">All Groups</option>';
+        Object.keys(groups).sort().forEach(function(g) {
+            $groupFilter.innerHTML += '<option value="'+escapeHtml(g)+'">'+escapeHtml(g)+'</option>';
+        });
+        $groupFilter.value = currentVal;
     }
 
     function updateStats() {
@@ -794,6 +856,7 @@ body {
         $titleInput.value = post.title||'';
         $slugInput.value = post.slug||'';
         $authorInput.value = post.author||'';
+        $groupInput.value = post.group||'';
         $contentInput.value = post.content||'';
         $publishTimeInput.value = toDatetimeLocal(post.publishTime);
         $timeDisplay.textContent = formatTime(post.publishTime);
@@ -811,6 +874,7 @@ body {
         $titleInput.value = '';
         $slugInput.value = '';
         $authorInput.value = '';
+        $groupInput.value = '';
         $contentInput.value = '';
         $publishTimeInput.value = toDatetimeLocal(nowISO());
         $timeDisplay.textContent = formatTime(nowISO());
@@ -905,7 +969,7 @@ body {
         imp.forEach(function(p) {
             if (!p.id||!p.title) { skipped++; return; }
             if (existingIds[p.id]) { skipped++; return; }
-            posts.push({ id:p.id, title:p.title||'', slug:p.slug||generateSlug(p.title), author:p.author||'', content:p.content||'',
+            posts.push({ id:p.id, title:p.title||'', slug:p.slug||generateSlug(p.title), author:p.author||'', group:p.group||'', content:p.content||'',
                 publishTime:p.publishTime||p.createdAt||nowISO(), createdAt:p.createdAt||nowISO(), updatedAt:p.updatedAt||nowISO(),
                 published:p.published||false, publishedUrl:p.publishedUrl||'', publishedSha:p.publishedSha||'' });
             existingIds[p.id]=true; added++;
@@ -918,6 +982,7 @@ body {
 
     // ==================== Events ====================
     $searchInput.addEventListener('input', function(){ currentFilter=$searchInput.value; renderPostList(); });
+    $groupFilter.addEventListener('change', function(){ renderPostList(); });
     $sortSelect.addEventListener('change', function(){ currentSort=$sortSelect.value; renderPostList(); });
     $btnSave.addEventListener('click', saveOrUpdatePost);
     $btnNew.addEventListener('click', function(){ resetEditor(); renderPostList(); });

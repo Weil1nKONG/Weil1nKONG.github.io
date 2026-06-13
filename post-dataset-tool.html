@@ -13,6 +13,7 @@
     --danger: #e74c3c; --danger-hover: #c0392b; --text: #2c3e50; --text-secondary: #7f8c8d;
     --border: #e1e5ea; --shadow: 0 2px 8px rgba(0,0,0,0.06);
     --shadow-hover: 0 4px 16px rgba(0,0,0,0.10); --radius: 10px; --transition: 0.2s ease;
+    --success: #27ae60; --success-hover: #219a52; --warning: #e67e22;
 }
 
 body {
@@ -28,7 +29,17 @@ body {
 }
 .header-title { font-size: 1.3rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
 .header-title .icon { font-size: 1.5rem; }
+.header-right { display: flex; align-items: center; gap: 12px; }
 .header-stats { font-size: 0.85rem; color: var(--text-secondary); background: var(--bg); padding: 6px 14px; border-radius: 20px; font-weight: 500; }
+.btn-icon {
+    padding: 8px 14px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+    cursor: pointer; font-size: 0.9rem; transition: all var(--transition); color: var(--text);
+    display: flex; align-items: center; gap: 6px; font-weight: 500;
+}
+.btn-icon:hover { background: var(--border); }
+.token-indicator { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+.token-indicator.active { background: var(--success); }
+.token-indicator.inactive { background: #ccc; }
 
 /* ========== Layout ========== */
 .main-container {
@@ -67,18 +78,26 @@ body {
     font-size: 0.8rem; color: var(--primary); white-space: nowrap; font-weight: 500;
     background: rgba(79, 110, 246, 0.08); padding: 3px 10px; border-radius: 12px;
 }
-.post-card-meta { display: flex; gap: 16px; font-size: 0.82rem; color: var(--text-secondary); }
+.post-card-meta { display: flex; gap: 16px; font-size: 0.82rem; color: var(--text-secondary); align-items: center; }
 .post-card-preview { font-size: 0.85rem; color: var(--text-secondary); margin-top: 6px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* Publish status badges */
+.publish-badge {
+    font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; font-weight: 600;
+    display: inline-flex; align-items: center; gap: 4px;
+}
+.publish-badge.published { background: rgba(39, 174, 96, 0.12); color: var(--success); }
+.publish-badge.draft { background: rgba(230, 126, 34, 0.12); color: var(--warning); }
 
 /* ========== Right: Edit Panel ========== */
 .edit-panel {
-    width: 420px; flex-shrink: 0; background: var(--card-bg); border-radius: var(--radius);
+    width: 440px; flex-shrink: 0; background: var(--card-bg); border-radius: var(--radius);
     box-shadow: var(--shadow); padding: 24px; display: flex; flex-direction: column;
-    gap: 20px; height: fit-content; position: sticky; top: 90px;
+    gap: 16px; height: fit-content; position: sticky; top: 90px; max-height: calc(100vh - 120px); overflow-y: auto;
 }
 .panel-title { font-size: 1.1rem; font-weight: 700; color: var(--text); padding-bottom: 12px; border-bottom: 2px solid var(--bg); }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group label { font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
+.form-group { display: flex; flex-direction: column; gap: 4px; }
+.form-group label { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; }
 .form-group input, .form-group textarea {
     padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
     font-size: 0.95rem; font-family: inherit; outline: none; transition: border-color var(--transition);
@@ -87,45 +106,52 @@ body {
 .form-group input:focus, .form-group textarea:focus {
     border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 110, 246, 0.08); background: var(--card-bg);
 }
-.form-group textarea { min-height: 160px; }
+.form-group textarea { min-height: 140px; }
+
+.slug-row { display: flex; align-items: center; gap: 6px; }
+.slug-row .slug-prefix { font-size: 0.85rem; color: var(--text-secondary); white-space: nowrap; }
+.slug-row input { flex: 1; }
 
 /* ========== Publish Time (core feature) ========== */
 .time-edit-section {
     background: rgba(79, 110, 246, 0.04); border: 1px dashed var(--primary);
-    border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; gap: 10px;
+    border-radius: var(--radius); padding: 14px; display: flex; flex-direction: column; gap: 8px;
 }
 .time-edit-section .section-label {
-    font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase;
+    font-size: 0.78rem; font-weight: 700; color: var(--primary); text-transform: uppercase;
     letter-spacing: 0.8px; display: flex; align-items: center; gap: 6px;
 }
-.time-display { font-size: 1.1rem; font-weight: 600; color: var(--text); }
-.time-edit-row { display: flex; gap: 10px; align-items: center; }
+.time-display { font-size: 1rem; font-weight: 600; color: var(--text); }
+.time-edit-row { display: flex; gap: 8px; align-items: center; }
 .time-edit-row input[type="datetime-local"] {
     flex: 1; padding: 8px 12px; border: 1px solid var(--border); border-radius: 6px;
     font-size: 0.9rem; font-family: inherit; outline: none; background: var(--card-bg);
 }
 .time-edit-row input[type="datetime-local"]:focus { border-color: var(--primary); }
+
+/* ========== Buttons ========== */
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+    padding: 10px 18px; border: none; border-radius: 8px; font-size: 0.88rem;
+    cursor: pointer; font-weight: 600; transition: all var(--transition);
+    display: flex; align-items: center; gap: 6px; white-space: nowrap;
+}
+.btn-primary { background: var(--primary); color: #fff; }
+.btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+.btn-success { background: var(--success); color: #fff; }
+.btn-success:hover { background: var(--success-hover); transform: translateY(-1px); }
+.btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+.btn-outline:hover { background: rgba(79, 110, 246, 0.06); }
+.btn-danger { background: transparent; color: var(--danger); border: 2px solid var(--danger); }
+.btn-danger:hover { background: var(--danger); color: #fff; }
+.btn-sm { padding: 5px 12px; font-size: 0.78rem; border-radius: 6px; }
 .btn-set-time {
     padding: 8px 16px; background: var(--primary); color: #fff; border: none;
     border-radius: 6px; font-size: 0.85rem; cursor: pointer; font-weight: 600; white-space: nowrap;
     transition: background var(--transition);
 }
 .btn-set-time:hover { background: var(--primary-hover); }
-
-/* ========== Buttons ========== */
-.btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
-.btn {
-    padding: 10px 20px; border: none; border-radius: 8px; font-size: 0.9rem;
-    cursor: pointer; font-weight: 600; transition: all var(--transition);
-    display: flex; align-items: center; gap: 6px;
-}
-.btn-primary { background: var(--primary); color: #fff; }
-.btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
-.btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
-.btn-outline:hover { background: rgba(79, 110, 246, 0.06); }
-.btn-danger { background: transparent; color: var(--danger); border: 2px solid var(--danger); }
-.btn-danger:hover { background: var(--danger); color: #fff; }
-.btn-sm { padding: 5px 12px; font-size: 0.78rem; border-radius: 6px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
 
 /* ========== Footer ========== */
 .footer-bar {
@@ -141,12 +167,14 @@ body {
     position: fixed; top: 24px; right: 24px; background: #2c3e50; color: #fff;
     padding: 12px 24px; border-radius: 8px; font-size: 0.9rem; font-weight: 500;
     z-index: 9999; opacity: 0; transform: translateY(-10px);
-    animation: toastIn 0.3s forwards, toastOut 0.3s 2.5s forwards; pointer-events: none;
+    animation: toastIn 0.3s forwards, toastOut 0.3s 3.5s forwards; pointer-events: none;
+    max-width: 450px;
 }
 @keyframes toastIn { to { opacity: 1; transform: translateY(0); } }
 @keyframes toastOut { to { opacity: 0; transform: translateY(-10px); } }
 .toast.success { background: #27ae60; }
 .toast.error { background: #e74c3c; }
+.toast.loading { background: #4f6ef6; }
 
 /* ========== Empty State ========== */
 .empty-state {
@@ -157,7 +185,7 @@ body {
 .empty-state h3 { font-size: 1.1rem; margin-bottom: 6px; color: var(--text); }
 .empty-state p { font-size: 0.9rem; }
 
-/* ========== Confirm Modal ========== */
+/* ========== Modal ========== */
 .modal-overlay {
     position: fixed; top: 0; left: 0; right: 0; bottom: 0;
     background: rgba(0,0,0,0.4); z-index: 200; display: flex;
@@ -166,17 +194,42 @@ body {
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 .modal-box {
     background: var(--card-bg); border-radius: var(--radius); padding: 28px;
-    max-width: 400px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: center;
+    max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); text-align: left;
+    max-height: 90vh; overflow-y: auto;
 }
-.modal-box h3 { margin-bottom: 12px; }
-.modal-box p { color: var(--text-secondary); margin-bottom: 20px; font-size: 0.9rem; }
-.modal-box .btn-row { justify-content: center; }
+.modal-box h3 { margin-bottom: 12px; font-size: 1.1rem; }
+.modal-box p { color: var(--text-secondary); margin-bottom: 16px; font-size: 0.88rem; line-height: 1.5; }
+.modal-box .btn-row { justify-content: flex-end; margin-top: 16px; }
+.modal-box .form-group { margin-bottom: 12px; }
+.modal-box label { font-size: 0.82rem; font-weight: 600; color: var(--text-secondary); display: block; margin-bottom: 4px; }
+.modal-box input[type="text"],
+.modal-box input[type="password"],
+.modal-box input[type="url"] {
+    width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 0.9rem; font-family: inherit; outline: none;
+}
+.modal-box input:focus { border-color: var(--primary); }
+.modal-box .hint {
+    font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;
+    line-height: 1.4;
+}
+.modal-box .hint a { color: var(--primary); }
+
+/* ========== Published URL ========== */
+.published-info {
+    background: rgba(39, 174, 96, 0.06); border: 1px solid rgba(39, 174, 96, 0.3);
+    border-radius: var(--radius); padding: 12px 14px; font-size: 0.85rem;
+    display: none;
+}
+.published-info.visible { display: block; }
+.published-info .pub-label { font-weight: 700; color: var(--success); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.5px; }
+.published-info a { color: var(--primary); word-break: break-all; }
 
 /* ========== Responsive ========== */
 @media (max-width: 900px) {
     .main-container { flex-direction: column; padding: 16px; }
-    .edit-panel { width: 100%; position: static; }
-    .header { padding: 12px 16px; }
+    .edit-panel { width: 100%; position: static; max-height: none; }
+    .header { padding: 12px 16px; flex-wrap: wrap; gap: 8px; }
     .footer-bar { padding: 12px 16px; flex-direction: column; align-items: flex-start; }
 }
 .hidden-input { display: none; }
@@ -184,13 +237,16 @@ body {
 </head>
 <body>
 
-<!-- Header -->
+<!-- ========== Header ========== -->
 <header class="header">
     <div class="header-title"><span class="icon">&#x1F4CA;</span><span>Post Dataset Manager</span></div>
-    <div class="header-stats" id="headerStats">0 posts total</div>
+    <div class="header-right">
+        <span class="header-stats" id="headerStats">0 posts total</span>
+        <button class="btn-icon" id="btnSettings" title="GitHub Settings">&#x2699;&#xFE0F; <span id="settingsLabel">Settings</span></button>
+    </div>
 </header>
 
-<!-- Main -->
+<!-- ========== Main ========== -->
 <div class="main-container">
 
     <!-- Left: Post List -->
@@ -218,7 +274,15 @@ body {
 
         <div class="form-group">
             <label>Title</label>
-            <input type="text" id="titleInput" placeholder="Enter post title...">
+            <input type="text" id="titleInput" placeholder="Enter post title..." oninput="window._onTitleChange()">
+        </div>
+
+        <div class="form-group">
+            <label>URL Slug</label>
+            <div class="slug-row">
+                <span class="slug-prefix">weil1nkong.github.io/posts/</span>
+                <input type="text" id="slugInput" placeholder="my-post-slug">
+            </div>
         </div>
 
         <div class="form-group">
@@ -232,7 +296,7 @@ body {
         </div>
 
         <!-- Publish Time (core feature) -->
-        <div class="time-edit-section" id="timeEditSection">
+        <div class="time-edit-section">
             <div class="section-label">&#x23F0; Publish Time <span style="font-weight:400;font-size:0.75rem;color:#e67e22;">(Editable independently)</span></div>
             <div class="time-display" id="timeDisplay">Not set</div>
             <div class="time-edit-row">
@@ -241,19 +305,32 @@ body {
             </div>
         </div>
 
+        <!-- Published info -->
+        <div class="published-info" id="publishedInfo">
+            <span class="pub-label">&#x1F310; Published</span><br>
+            <a href="#" id="publishedLink" target="_blank"></a>
+        </div>
+
+        <!-- Local save / GitHub publish rows -->
         <div class="btn-row">
-            <button class="btn btn-primary" id="btnSave">&#x1F4BE; Publish Post</button>
+            <button class="btn btn-primary" id="btnSave">&#x1F4BE; Save Locally</button>
             <button class="btn btn-outline" id="btnNew" style="display:none;">&#x2795; New</button>
         </div>
 
+        <div class="btn-row">
+            <button class="btn btn-success" id="btnPublish">&#x1F680; Publish to GitHub</button>
+            <button class="btn btn-outline" id="btnUpdateGH" style="display:none;">&#x1F504; Update on GitHub</button>
+        </div>
+
         <div class="btn-row" id="editActions" style="display:none;">
+            <button class="btn btn-sm btn-danger" id="btnUnpublish">&#x1F4A5; Unpublish</button>
             <button class="btn btn-sm btn-danger" id="btnDelete">&#x1F5D1;&#xFE0F; Delete Post</button>
         </div>
     </aside>
 
 </div>
 
-<!-- Footer -->
+<!-- ========== Footer ========== -->
 <footer class="footer-bar">
     <div class="footer-info" id="footerInfo">&#x1F4A1; Tip: Publish time can be edited independently from post content</div>
     <div class="footer-actions">
@@ -264,6 +341,46 @@ body {
     <input type="file" id="importFileInput" class="hidden-input" accept=".html,.htm">
 </footer>
 
+<!-- ========== Settings Modal ========== -->
+<div class="modal-overlay" id="settingsModal" style="display:none;">
+    <div class="modal-box">
+        <h3>&#x2699;&#xFE0F; GitHub Settings</h3>
+        <p>Connect to your GitHub repository to publish posts directly to your GitHub Pages site.</p>
+
+        <div class="form-group">
+            <label>GitHub Personal Access Token</label>
+            <input type="password" id="ghTokenInput" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+            <div class="hint">
+                <a href="https://github.com/settings/tokens" target="_blank">Create a Classic Token</a> with <strong>repo</strong> scope.
+                The token is stored only in your browser's localStorage.
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Repository Owner</label>
+            <input type="text" id="ghOwnerInput" placeholder="Weil1nKONG" value="Weil1nKONG">
+        </div>
+
+        <div class="form-group">
+            <label>Repository Name</label>
+            <input type="text" id="ghRepoInput" placeholder="Weil1nKONG.github.io" value="Weil1nKONG.github.io">
+        </div>
+
+        <div class="form-group">
+            <label>Branch</label>
+            <input type="text" id="ghBranchInput" placeholder="main" value="main">
+        </div>
+
+        <div class="btn-row" style="justify-content: space-between;">
+            <button class="btn btn-sm btn-outline" id="btnTestConnection">&#x1F50D; Test Connection</button>
+            <div>
+                <button class="btn btn-sm btn-outline" id="btnSettingsCancel">Cancel</button>
+                <button class="btn btn-sm btn-primary" id="btnSettingsSave">&#x1F4BE; Save Settings</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Toast Container -->
 <div id="toastContainer"></div>
 
@@ -273,6 +390,7 @@ body {
 
     // ==================== Data Store ====================
     var STORAGE_KEY = 'post_dataset_tool_data';
+    var SETTINGS_KEY = 'post_dataset_gh_settings';
 
     function loadPosts() {
         try { var raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : []; }
@@ -281,40 +399,49 @@ body {
 
     function savePosts(posts) {
         try { localStorage.setItem(STORAGE_KEY, JSON.stringify(posts)); }
-        catch (e) { showToast('Save failed: storage full. Please export and clear.', 'error'); }
+        catch (e) { showToast('Save failed: storage full.', 'error'); }
     }
 
-    function generateId() {
-        return 'post_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    function loadSettings() {
+        try {
+            var raw = localStorage.getItem(SETTINGS_KEY);
+            return raw ? JSON.parse(raw) : { token: '', owner: 'Weil1nKONG', repo: 'Weil1nKONG.github.io', branch: 'main' };
+        } catch (e) { return { token: '', owner: 'Weil1nKONG', repo: 'Weil1nKONG.github.io', branch: 'main' }; }
+    }
+
+    function saveSettings(settings) {
+        try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); }
+        catch (e) { showToast('Failed to save settings.', 'error'); }
+    }
+
+    function generateId() { return 'post_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9); }
+
+    function generateSlug(title) {
+        return title.toLowerCase().replace(/[^a-z0-9一-鿿]+/g, '-').replace(/^-|-$/g, '').substring(0, 80) || 'untitled';
     }
 
     function formatTime(isoString) {
         if (!isoString) return 'Not set';
         try {
             var d = new Date(isoString);
-            var y = d.getFullYear();
-            var m = String(d.getMonth() + 1).padStart(2, '0');
-            var day = String(d.getDate()).padStart(2, '0');
-            var h = String(d.getHours()).padStart(2, '0');
+            var y = d.getFullYear(); var m = String(d.getMonth() + 1).padStart(2, '0');
+            var day = String(d.getDate()).padStart(2, '0'); var h = String(d.getHours()).padStart(2, '0');
             var min = String(d.getMinutes()).padStart(2, '0');
             return y + '-' + m + '-' + day + ' ' + h + ':' + min;
         } catch (e) { return 'Invalid format'; }
     }
 
-    function toDatetimeLocal(isoString) {
-        if (!isoString) return '';
-        try { return isoString.substring(0, 16); } catch (e) { return ''; }
-    }
+    function toDatetimeLocal(iso) { if (!iso) return ''; try { return iso.substring(0, 16); } catch (e) { return ''; } }
 
     function nowISO() {
         var d = new Date();
-        var y = d.getFullYear();
-        var m = String(d.getMonth() + 1).padStart(2, '0');
-        var day = String(d.getDate()).padStart(2, '0');
-        var h = String(d.getHours()).padStart(2, '0');
-        var min = String(d.getMinutes()).padStart(2, '0');
-        return y + '-' + m + '-' + day + 'T' + h + ':' + min;
+        return d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' +
+               String(d.getDate()).padStart(2,'0') + 'T' + String(d.getHours()).padStart(2,'0') + ':' +
+               String(d.getMinutes()).padStart(2,'0');
     }
+
+    // ==================== Settings ====================
+    var ghSettings = loadSettings();
 
     // ==================== State ====================
     var posts = loadPosts();
@@ -322,11 +449,22 @@ body {
     var currentFilter = '';
     var currentSort = 'newest';
 
+    // Migrate old posts to have new fields
+    var migrated = false;
+    posts.forEach(function(p) {
+        if (p.slug === undefined) { p.slug = generateSlug(p.title || ''); migrated = true; }
+        if (p.published === undefined) { p.published = false; migrated = true; }
+        if (p.publishedUrl === undefined) { p.publishedUrl = ''; migrated = true; }
+        if (p.publishedSha === undefined) { p.publishedSha = ''; migrated = true; }
+    });
+    if (migrated) savePosts(posts);
+
     // ==================== DOM Refs ====================
     var $postList = document.getElementById('postList');
     var $searchInput = document.getElementById('searchInput');
     var $sortSelect = document.getElementById('sortSelect');
     var $titleInput = document.getElementById('titleInput');
+    var $slugInput = document.getElementById('slugInput');
     var $authorInput = document.getElementById('authorInput');
     var $contentInput = document.getElementById('contentInput');
     var $publishTimeInput = document.getElementById('publishTimeInput');
@@ -334,6 +472,9 @@ body {
     var $btnSave = document.getElementById('btnSave');
     var $btnNew = document.getElementById('btnNew');
     var $btnDelete = document.getElementById('btnDelete');
+    var $btnPublish = document.getElementById('btnPublish');
+    var $btnUpdateGH = document.getElementById('btnUpdateGH');
+    var $btnUnpublish = document.getElementById('btnUnpublish');
     var $btnSetTime = document.getElementById('btnSetTime');
     var $btnExport = document.getElementById('btnExport');
     var $btnImport = document.getElementById('btnImport');
@@ -343,7 +484,11 @@ body {
     var $panelTitle = document.getElementById('panelTitle');
     var $headerStats = document.getElementById('headerStats');
     var $footerInfo = document.getElementById('footerInfo');
+    var $publishedInfo = document.getElementById('publishedInfo');
+    var $publishedLink = document.getElementById('publishedLink');
     var $toastContainer = document.getElementById('toastContainer');
+    var $settingsModal = document.getElementById('settingsModal');
+    var $settingsLabel = document.getElementById('settingsLabel');
 
     // ==================== Toast ====================
     function showToast(msg, type) {
@@ -352,7 +497,469 @@ body {
         el.className = 'toast ' + type;
         el.textContent = msg;
         $toastContainer.appendChild(el);
-        setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 3000);
+        setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 4000);
+    }
+
+    // ==================== Settings Modal ====================
+    function openSettings() {
+        document.getElementById('ghTokenInput').value = ghSettings.token || '';
+        document.getElementById('ghOwnerInput').value = ghSettings.owner || 'Weil1nKONG';
+        document.getElementById('ghRepoInput').value = ghSettings.repo || 'Weil1nKONG.github.io';
+        document.getElementById('ghBranchInput').value = ghSettings.branch || 'main';
+        $settingsModal.style.display = 'flex';
+    }
+
+    function closeSettings() { $settingsModal.style.display = 'none'; updateSettingsIndicator(); }
+
+    function saveGHSettings() {
+        ghSettings.token = document.getElementById('ghTokenInput').value.trim();
+        ghSettings.owner = document.getElementById('ghOwnerInput').value.trim() || 'Weil1nKONG';
+        ghSettings.repo = document.getElementById('ghRepoInput').value.trim() || 'Weil1nKONG.github.io';
+        ghSettings.branch = document.getElementById('ghBranchInput').value.trim() || 'main';
+        saveSettings(ghSettings);
+        closeSettings();
+        updateSettingsIndicator();
+        updatePublishButtons();
+        showToast('Settings saved.', 'success');
+    }
+
+    function updateSettingsIndicator() {
+        if (ghSettings.token) {
+            $settingsLabel.innerHTML = '<span class="token-indicator active"></span> Connected';
+            $settingsLabel.style.color = '#27ae60';
+        } else {
+            $settingsLabel.innerHTML = '<span class="token-indicator inactive"></span> Not Connected';
+            $settingsLabel.style.color = '';
+        }
+    }
+
+    function isGHConfigured() { return !!(ghSettings.token && ghSettings.owner && ghSettings.repo && ghSettings.branch); }
+
+    // ==================== GitHub API ====================
+    function ghApiBase() {
+        return 'https://api.github.com/repos/' + ghSettings.owner + '/' + ghSettings.repo + '/contents/';
+    }
+
+    async function githubAPI(method, filePath, content, sha, message) {
+        if (!isGHConfigured()) throw new Error('GitHub not configured. Please open Settings and add your token.');
+
+        var url = ghApiBase() + filePath;
+        var body = {
+            message: message || ('Update ' + filePath),
+            branch: ghSettings.branch
+        };
+        if (content !== null && content !== undefined) {
+            body.content = btoa(unescape(encodeURIComponent(content)));
+        }
+        if (sha) body.sha = sha;
+
+        var resp = await fetch(url, {
+            method: method,
+            headers: {
+                'Authorization': 'Bearer ' + ghSettings.token,
+                'Accept': 'application/vnd.github+json',
+                'Content-Type': 'application/json'
+            },
+            body: method === 'DELETE' ? (sha ? JSON.stringify({ message: body.message, sha: sha, branch: body.branch }) : null) : JSON.stringify(body)
+        });
+
+        var data = await resp.json();
+        if (!resp.ok) {
+            var errMsg = data.message || ('HTTP ' + resp.status);
+            if (resp.status === 401) errMsg = 'Invalid token. Please check your GitHub token in Settings.';
+            if (resp.status === 404) errMsg = 'File not found on GitHub: ' + filePath;
+            if (resp.status === 409) errMsg = 'Conflict: file may have been modified externally. Try refreshing.';
+            if (resp.status === 422) errMsg = 'Invalid data: ' + (data.message || 'check repository settings.');
+            throw new Error(errMsg);
+        }
+        return data; // { content: { sha, ... }, commit: {...} }
+    }
+
+    async function ghGetFile(filePath) {
+        return githubAPI('GET', filePath, null, null, null);
+    }
+
+    async function ghPutFile(filePath, content, sha, message) {
+        return githubAPI('PUT', filePath, content, sha, message);
+    }
+
+    async function ghDeleteFile(filePath, sha, message) {
+        return githubAPI('DELETE', filePath, null, sha, message);
+    }
+
+    async function testGHConnection() {
+        try {
+            var data = await githubAPI('GET', 'README.md', null, null, null);
+            showToast('Connection successful! Repo accessible.', 'success');
+            return true;
+        } catch (e) {
+            showToast('Connection failed: ' + e.message, 'error');
+            return false;
+        }
+    }
+
+    // ==================== Generate Post Page HTML ====================
+    function generatePostPageHTML(post) {
+        return '<!DOCTYPE html>\n<html lang="en">\n<head>\n' +
+            '<meta charset="UTF-8">\n' +
+            '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+            '<title>' + escapeHtml(post.title) + '</title>\n' +
+            '<meta name="author" content="' + escapeHtml(post.author || 'Anonymous') + '">\n' +
+            '<meta name="publish-time" content="' + escapeHtml(post.publishTime) + '">\n' +
+            '<meta name="post-id" content="' + escapeHtml(post.id) + '">\n' +
+            '<style>\n' +
+            'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f9fafb; color: #2c3e50; line-height: 1.7; }\n' +
+            'article { background: #fff; border: 1px solid #e1e5ea; border-radius: 12px; padding: 30px 36px; box-shadow: 0 2px 10px rgba(0,0,0,0.04); }\n' +
+            'h1 { font-size: 1.8rem; color: #2c3e50; margin-bottom: 8px; }\n' +
+            '.meta { display: flex; flex-wrap: wrap; gap: 16px; font-size: 0.85rem; color: #7f8c8d; margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #f0f0f0; }\n' +
+            '.meta time { color: #4f6ef6; font-weight: 600; }\n' +
+            '.content { font-size: 1.05rem; white-space: pre-wrap; line-height: 1.8; }\n' +
+            'footer { margin-top: 40px; text-align: center; font-size: 0.8rem; color: #999; }\n' +
+            'footer a { color: #4f6ef6; text-decoration: none; }\n' +
+            '</style>\n</head>\n<body>\n' +
+            '<article>\n' +
+            '  <h1>' + escapeHtml(post.title) + '</h1>\n' +
+            '  <div class="meta">\n' +
+            '    <span>By ' + escapeHtml(post.author || 'Anonymous') + '</span>\n' +
+            '    <time datetime="' + escapeHtml(post.publishTime) + '">Published: ' + formatTime(post.publishTime) + '</time>\n' +
+            '  </div>\n' +
+            '  <div class="content">' + escapeHtml(post.content).replace(/\n/g, '<br>\n') + '</div>\n' +
+            '</article>\n' +
+            '<footer>\n' +
+            '  <p><a href="/posts/">&#x2190; Back to all posts</a></p>\n' +
+            '</footer>\n' +
+            '\n<script type="application/json" id="post-data">\n' +
+            JSON.stringify(post, null, 2) +
+            '\n</' + 'script>\n' +
+            '</body>\n</html>';
+    }
+
+    // ==================== Generate Index Page HTML ====================
+    function generateIndexPageHTML(publishedPosts, baseUrl) {
+        var itemsHTML = '';
+        publishedPosts.forEach(function(p) {
+            itemsHTML += '      <li>\n' +
+                '        <a href="./' + escapeHtml(p.slug) + '.html">\n' +
+                '          <h3>' + escapeHtml(p.title) + '</h3>\n' +
+                '          <span class="idx-meta">' + escapeHtml(p.author || 'Anonymous') + ' &middot; <time datetime="' + escapeHtml(p.publishTime) + '">' + formatTime(p.publishTime) + '</time></span>\n' +
+                '          <p>' + escapeHtml(truncateText(p.content, 120)) + '</p>\n' +
+                '        </a>\n' +
+                '      </li>\n';
+        });
+
+        return '<!DOCTYPE html>\n<html lang="en">\n<head>\n' +
+            '<meta charset="UTF-8">\n' +
+            '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+            '<title>Posts Index</title>\n' +
+            '<style>\n' +
+            'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f9fafb; color: #2c3e50; line-height: 1.7; }\n' +
+            'h1 { color: #4f6ef6; border-bottom: 3px solid #4f6ef6; padding-bottom: 12px; }\n' +
+            '.info { background: #eef0fd; padding: 14px 18px; border-radius: 8px; margin-bottom: 24px; font-size: 0.85rem; color: #555; }\n' +
+            'ul { list-style: none; padding: 0; }\n' +
+            'li { margin-bottom: 14px; }\n' +
+            'li a { display: block; background: #fff; border: 1px solid #e1e5ea; border-radius: 10px; padding: 18px 22px; text-decoration: none; color: inherit; box-shadow: 0 2px 6px rgba(0,0,0,0.03); transition: 0.2s; }\n' +
+            'li a:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }\n' +
+            'li h3 { margin: 0 0 6px 0; font-size: 1.1rem; color: #2c3e50; }\n' +
+            '.idx-meta { font-size: 0.8rem; color: #7f8c8d; }\n' +
+            '.idx-meta time { color: #4f6ef6; font-weight: 600; }\n' +
+            'li p { margin: 8px 0 0 0; font-size: 0.88rem; color: #666; }\n' +
+            'footer { margin-top: 40px; text-align: center; font-size: 0.8rem; color: #999; }\n' +
+            '</style>\n</head>\n<body>\n' +
+            '<h1>&#x1F4D1; Posts Index</h1>\n' +
+            '<div class="info"><strong>' + publishedPosts.length + '</strong> posts published &middot; Updated: ' + formatTime(new Date().toISOString()) + '</div>\n' +
+            '<ul>\n' + itemsHTML + '</ul>\n' +
+            '<footer>Generated by Post Dataset Manager</footer>\n' +
+            '</body>\n</html>';
+    }
+
+    // ==================== Publish / Update / Unpublish ====================
+    async function publishPostToGitHub() {
+        if (!isGHConfigured()) { showToast('Please configure GitHub in Settings first.', 'error'); openSettings(); return; }
+
+        var title = $titleInput.value.trim();
+        var content = $contentInput.value.trim();
+        if (!title) { showToast('Please enter a title', 'error'); return; }
+        if (!content) { showToast('Please enter content', 'error'); return; }
+
+        // Ensure post is saved locally first
+        saveOrUpdatePostLocal();
+
+        var post = null;
+        for (var i = 0; i < posts.length; i++) {
+            if (posts[i].id === currentPostId) { post = posts[i]; break; }
+        }
+        if (!post) { showToast('Error: post not found', 'error'); return; }
+
+        // Auto-generate slug if empty
+        if (!post.slug) { post.slug = generateSlug(title); }
+        $slugInput.value = post.slug;
+
+        var postHTML = generatePostPageHTML(post);
+        var filePath = 'posts/' + post.slug + '.html';
+
+        $btnPublish.disabled = true;
+        $btnPublish.textContent = '⏳ Publishing...';
+        showToast('Publishing to GitHub...', 'loading');
+
+        try {
+            // Check if file already exists (for SHA)
+            var existingSha = '';
+            try {
+                var existing = await ghGetFile(filePath);
+                existingSha = existing.sha;
+            } catch (e) { /* File doesn't exist yet, that's fine */ }
+
+            // Put the post HTML
+            var result = await ghPutFile(filePath, postHTML, existingSha || undefined,
+                (existingSha ? 'Update ' : 'Create ') + 'post: ' + post.title);
+
+            // Update post metadata
+            post.publishedSha = result.content.sha;
+            post.published = true;
+            post.publishedUrl = 'https://' + ghSettings.owner + '.github.io/posts/' + post.slug + '.html';
+            post.slug = post.slug; // ensure slug is saved
+            savePosts(posts);
+
+            // Rebuild index page
+            await rebuildIndexPage();
+
+            // Update UI
+            updatePublishedInfo(post);
+            updatePublishButtons();
+            renderPostList();
+            $btnPublish.textContent = '✅ Published';
+            $btnPublish.disabled = false;
+            setTimeout(function() { $btnPublish.textContent = '\u{1F504} Update on GitHub'; $btnPublish.style.display = 'none'; $btnUpdateGH.style.display = 'inline-flex'; }, 2000);
+            showToast('Published! \u{1F517} ' + post.publishedUrl, 'success');
+        } catch (e) {
+            $btnPublish.disabled = false;
+            $btnPublish.textContent = '\u{1F680} Publish to GitHub';
+            showToast('Publish failed: ' + e.message, 'error');
+        }
+    }
+
+    async function updatePostOnGitHub() {
+        if (!isGHConfigured()) { showToast('Please configure GitHub in Settings first.', 'error'); return; }
+
+        var post = null;
+        for (var i = 0; i < posts.length; i++) {
+            if (posts[i].id === currentPostId) { post = posts[i]; break; }
+        }
+        if (!post || !post.published) { showToast('Post is not published yet.', 'error'); return; }
+
+        // Save local changes first
+        post.title = $titleInput.value.trim();
+        post.author = $authorInput.value.trim();
+        post.content = $contentInput.value.trim();
+        post.slug = $slugInput.value.trim() || generateSlug(post.title);
+        post.publishTime = $publishTimeInput.value || nowISO();
+        post.updatedAt = nowISO();
+        savePosts(posts);
+
+        var postHTML = generatePostPageHTML(post);
+        var filePath = 'posts/' + post.slug + '.html';
+
+        $btnUpdateGH.disabled = true;
+        $btnUpdateGH.textContent = '⏳ Updating...';
+        showToast('Updating on GitHub...', 'loading');
+
+        try {
+            // Get the current SHA (might have been updated since last publish)
+            var existing;
+            try { existing = await ghGetFile(filePath); } catch (e) { /* ignore */ }
+            var sha = existing ? existing.sha : post.publishedSha;
+
+            // If slug changed, delete old file
+            var oldSlug = '';
+            for (var j = 0; j < posts.length; j++) {
+                if (posts[j].id === post.id) {
+                    // Check if the stored path differs from current
+                    var oldPath = 'posts/' + post.slug + '.html';
+                }
+            }
+
+            var result = await ghPutFile(filePath, postHTML, sha, 'Update post: ' + post.title);
+            post.publishedSha = result.content.sha;
+            post.publishedUrl = 'https://' + ghSettings.owner + '.github.io/posts/' + post.slug + '.html';
+            savePosts(posts);
+
+            await rebuildIndexPage();
+
+            updatePublishedInfo(post);
+            renderPostList();
+            $btnUpdateGH.disabled = false;
+            $btnUpdateGH.textContent = '✅ Updated';
+            setTimeout(function() { $btnUpdateGH.textContent = '\u{1F504} Update on GitHub'; }, 2000);
+            showToast('Updated! \u{1F517} ' + post.publishedUrl, 'success');
+        } catch (e) {
+            $btnUpdateGH.disabled = false;
+            $btnUpdateGH.textContent = '\u{1F504} Update on GitHub';
+            showToast('Update failed: ' + e.message, 'error');
+        }
+    }
+
+    async function unpublishPostFromGitHub() {
+        if (!isGHConfigured()) { showToast('Please configure GitHub in Settings first.', 'error'); return; }
+
+        var post = null;
+        for (var i = 0; i < posts.length; i++) {
+            if (posts[i].id === currentPostId) { post = posts[i]; break; }
+        }
+        if (!post || !post.published) { showToast('Post is not published.', 'error'); return; }
+
+        showConfirm('Confirm Unpublish', 'Remove "' + truncateText(post.title, 40) + '" from GitHub? The local copy will be kept.', async function() {
+            var filePath = 'posts/' + post.slug + '.html';
+            try {
+                await ghDeleteFile(filePath, post.publishedSha, 'Unpublish post: ' + post.title);
+            } catch (e) {
+                showToast('Warning: Could not delete file: ' + e.message, 'error');
+            }
+
+            post.published = false;
+            post.publishedSha = '';
+            post.publishedUrl = '';
+            savePosts(posts);
+
+            // Rebuild index
+            try { await rebuildIndexPage(); } catch (e) { /* ignore */ }
+
+            updatePublishedInfo(post);
+            updatePublishButtons();
+            renderPostList();
+            showToast('Unpublished. Local copy kept.', 'success');
+        });
+    }
+
+    async function rebuildIndexPage() {
+        var publishedPosts = posts.filter(function(p) { return p.published; });
+        publishedPosts.sort(function(a, b) { return (b.publishTime || '').localeCompare(a.publishTime || ''); });
+        var indexHTML = generateIndexPageHTML(publishedPosts);
+
+        var existingSha = '';
+        try { var existing = await ghGetFile('posts/index.html'); existingSha = existing.sha; } catch (e) {}
+
+        var result = await ghPutFile('posts/index.html', indexHTML, existingSha || undefined, 'Update posts index (' + publishedPosts.length + ' posts)');
+        return result;
+    }
+
+    // ==================== Local Save ====================
+    function saveOrUpdatePostLocal() {
+        var title = $titleInput.value.trim();
+        var content = $contentInput.value.trim();
+        if (!title) { showToast('Please enter a title', 'error'); $titleInput.focus(); return false; }
+        if (!content) { showToast('Please enter content', 'error'); $contentInput.focus(); return false; }
+
+        var publishTime = $publishTimeInput.value;
+        if (!publishTime) { publishTime = nowISO(); $publishTimeInput.value = toDatetimeLocal(publishTime); }
+        var slug = $slugInput.value.trim() || generateSlug(title);
+        var now = nowISO();
+
+        if (currentPostId) {
+            for (var i = 0; i < posts.length; i++) {
+                if (posts[i].id === currentPostId) {
+                    posts[i].title = title;
+                    posts[i].slug = slug;
+                    posts[i].author = $authorInput.value.trim();
+                    posts[i].content = content;
+                    posts[i].publishTime = publishTime;
+                    posts[i].updatedAt = now;
+                    break;
+                }
+            }
+            savePosts(posts);
+            showToast('Post saved locally', 'success');
+        } else {
+            var newPost = {
+                id: generateId(),
+                title: title, slug: slug, author: $authorInput.value.trim(),
+                content: content, publishTime: publishTime,
+                createdAt: now, updatedAt: now,
+                published: false, publishedUrl: '', publishedSha: ''
+            };
+            posts.push(newPost);
+            savePosts(posts);
+            currentPostId = newPost.id;
+            showToast('Post created (draft)', 'success');
+        }
+        renderPostList();
+        return true;
+    }
+
+    function saveOrUpdatePost() {
+        if (saveOrUpdatePostLocal()) {
+            var p = null;
+            for (var i = 0; i < posts.length; i++) { if (posts[i].id === currentPostId) { p = posts[i]; break; } }
+            if (p) {
+                loadPostToEditor(p.id);
+                updatePublishButtons();
+            }
+        }
+    }
+
+    // ==================== Update Publish Time Only ====================
+    function updatePublishTimeOnly() {
+        var newTime = $publishTimeInput.value;
+        if (!newTime) { showToast('Please select a time', 'error'); return; }
+
+        if (currentPostId) {
+            for (var i = 0; i < posts.length; i++) {
+                if (posts[i].id === currentPostId) { posts[i].publishTime = newTime; posts[i].updatedAt = nowISO(); break; }
+            }
+            savePosts(posts);
+        }
+        $timeDisplay.textContent = formatTime(newTime);
+        renderPostList();
+        showToast('Publish time updated: ' + formatTime(newTime), 'success');
+    }
+
+    // ==================== Delete ====================
+    function deletePost() {
+        if (!currentPostId) return;
+        var postTitle = '', post = null;
+        for (var i = 0; i < posts.length; i++) {
+            if (posts[i].id === currentPostId) { postTitle = posts[i].title; post = posts[i]; break; }
+        }
+        showConfirm('Confirm Delete', 'Delete "' + truncateText(postTitle, 40) + '"? This cannot be undone.', async function() {
+            // Delete from GitHub if published
+            if (post && post.published) {
+                try {
+                    await ghDeleteFile('posts/' + post.slug + '.html', post.publishedSha, 'Delete post: ' + post.title);
+                    try { await rebuildIndexPage(); } catch (e) {}
+                } catch (e) { showToast('Warning: could not delete from GitHub: ' + e.message, 'error'); }
+            }
+            posts = posts.filter(function(p) { return p.id !== currentPostId; });
+            savePosts(posts);
+            resetEditor();
+            renderPostList();
+            showToast('Post deleted', 'success');
+        });
+    }
+
+    function clearAll() {
+        showConfirm('Confirm Clear All', 'Delete all ' + posts.length + ' posts? Consider exporting first. This cannot be undone.', function() {
+            posts = [];
+            savePosts(posts);
+            resetEditor();
+            renderPostList();
+            showToast('All posts cleared', 'success');
+        });
+    }
+
+    // ==================== Confirm Modal ====================
+    function showConfirm(title, message, onConfirm) {
+        var overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.innerHTML = '<div class="modal-box">' +
+            '<h3>' + escapeHtml(title) + '</h3>' +
+            '<p>' + escapeHtml(message) + '</p>' +
+            '<div class="btn-row" style="justify-content: flex-end;">' +
+            '<button class="btn btn-outline btn-sm" id="modalCancel">Cancel</button>' +
+            '<button class="btn btn-danger btn-sm" id="modalConfirm">Confirm</button>' +
+            '</div></div>';
+        document.body.appendChild(overlay);
+        overlay.querySelector('#modalCancel').addEventListener('click', function() { document.body.removeChild(overlay); });
+        overlay.querySelector('#modalConfirm').addEventListener('click', function() { document.body.removeChild(overlay); onConfirm(); });
+        overlay.addEventListener('click', function(e) { if (e.target === overlay) document.body.removeChild(overlay); });
     }
 
     // ==================== Render ====================
@@ -394,6 +1001,11 @@ body {
                 html += '<span class="post-card-time">&#x1F555; ' + formatTime(p.publishTime) + '</span>';
                 html += '</div>';
                 html += '<div class="post-card-meta">';
+                if (p.published) {
+                    html += '<span class="publish-badge published">&#x1F310; Published</span>';
+                } else {
+                    html += '<span class="publish-badge draft">&#x1F4DD; Draft</span>';
+                }
                 html += '<span>&#x270D;&#xFE0F; ' + escapeHtml(p.author || 'Anonymous') + '</span>';
                 html += '<span>&#x1F4C5; Created: ' + formatTime(p.createdAt) + '</span>';
                 html += '</div>';
@@ -407,8 +1019,9 @@ body {
 
     function updateStats() {
         var filtered = getFilteredAndSortedPosts();
-        $headerStats.textContent = posts.length + ' posts total' +
-            (currentFilter ? ' (' + filtered.length + ' shown)' : '');
+        var pubCount = posts.filter(function(p) { return p.published; }).length;
+        $headerStats.textContent = posts.length + ' posts (' + pubCount + ' published)' +
+            (currentFilter ? ' - ' + filtered.length + ' shown' : '');
     }
 
     function loadPostToEditor(postId) {
@@ -420,137 +1033,79 @@ body {
         currentPostId = post.id;
         $panelTitle.textContent = '&#x270F;&#xFE0F; Edit Post';
         $titleInput.value = post.title || '';
+        $slugInput.value = post.slug || '';
         $authorInput.value = post.author || '';
         $contentInput.value = post.content || '';
         $publishTimeInput.value = toDatetimeLocal(post.publishTime);
         $timeDisplay.textContent = formatTime(post.publishTime);
-        $btnSave.textContent = '&#x1F4BE; Save Changes';
+        $btnSave.textContent = '&#x1F4BE; Save Locally';
         $btnNew.style.display = 'inline-flex';
         $editActions.style.display = 'flex';
-        $footerInfo.textContent = '&#x1F4DD; Editing: "' + truncateText(post.title, 30) + '" &mdash; use below to update publish time independently';
+        $footerInfo.textContent = '&#x1F4DD; Editing: "' + truncateText(post.title, 30) + '"';
+        updatePublishedInfo(post);
+        updatePublishButtons();
     }
 
     function resetEditor() {
         currentPostId = null;
         $panelTitle.textContent = '&#x270D;&#xFE0F; New Post';
         $titleInput.value = '';
+        $slugInput.value = '';
         $authorInput.value = '';
         $contentInput.value = '';
         $publishTimeInput.value = toDatetimeLocal(nowISO());
         $timeDisplay.textContent = formatTime(nowISO());
-        $btnSave.textContent = '&#x1F4BE; Publish Post';
+        $btnSave.textContent = '&#x1F4BE; Save Locally';
         $btnNew.style.display = 'none';
         $editActions.style.display = 'none';
         $footerInfo.textContent = '&#x1F4A1; Tip: Publish time can be edited independently from post content';
+        $publishedInfo.classList.remove('visible');
+        $btnPublish.style.display = 'inline-flex';
+        $btnPublish.textContent = '&#x1F680; Publish to GitHub';
+        $btnPublish.disabled = false;
+        $btnUpdateGH.style.display = 'none';
     }
 
-    // ==================== Actions ====================
-    function saveOrUpdatePost() {
-        var title = $titleInput.value.trim();
-        var content = $contentInput.value.trim();
-
-        if (!title) { showToast('Please enter a title', 'error'); $titleInput.focus(); return; }
-        if (!content) { showToast('Please enter content', 'error'); $contentInput.focus(); return; }
-
-        var publishTime = $publishTimeInput.value;
-        if (!publishTime) { publishTime = nowISO(); $publishTimeInput.value = toDatetimeLocal(publishTime); }
-
-        var now = nowISO();
-
-        if (currentPostId) {
-            for (var i = 0; i < posts.length; i++) {
-                if (posts[i].id === currentPostId) {
-                    posts[i].title = title;
-                    posts[i].author = $authorInput.value.trim();
-                    posts[i].content = content;
-                    posts[i].publishTime = publishTime;
-                    posts[i].updatedAt = now;
-                    break;
-                }
-            }
-            savePosts(posts);
-            showToast('Post updated', 'success');
+    function updatePublishedInfo(post) {
+        if (post && post.published) {
+            $publishedLink.href = post.publishedUrl;
+            $publishedLink.textContent = post.publishedUrl;
+            $publishedInfo.classList.add('visible');
         } else {
-            var newPost = {
-                id: generateId(),
-                title: title,
-                author: $authorInput.value.trim(),
-                content: content,
-                publishTime: publishTime,
-                createdAt: now,
-                updatedAt: now
-            };
-            posts.push(newPost);
-            savePosts(posts);
-            currentPostId = newPost.id;
-            showToast('Post published', 'success');
-            loadPostToEditor(newPost.id);
+            $publishedInfo.classList.remove('visible');
         }
-        renderPostList();
     }
 
-    function updatePublishTimeOnly() {
+    function updatePublishButtons() {
         if (!currentPostId) {
-            var newTime = $publishTimeInput.value;
-            if (newTime) { $timeDisplay.textContent = formatTime(newTime); showToast('Publish time preset: ' + formatTime(newTime), 'success'); }
+            $btnPublish.style.display = 'inline-flex';
+            $btnPublish.textContent = '&#x1F680; Publish to GitHub';
+            $btnPublish.disabled = false;
+            $btnUpdateGH.style.display = 'none';
             return;
         }
-        var newTime = $publishTimeInput.value;
-        if (!newTime) { showToast('Please select a time', 'error'); return; }
+        var post = null;
         for (var i = 0; i < posts.length; i++) {
-            if (posts[i].id === currentPostId) {
-                posts[i].publishTime = newTime;
-                posts[i].updatedAt = nowISO();
-                break;
-            }
+            if (posts[i].id === currentPostId) { post = posts[i]; break; }
         }
-        savePosts(posts);
-        $timeDisplay.textContent = formatTime(newTime);
-        renderPostList();
-        showToast('Publish time updated: ' + formatTime(newTime), 'success');
-    }
-
-    function deletePost() {
-        if (!currentPostId) return;
-        var postTitle = '';
-        for (var i = 0; i < posts.length; i++) {
-            if (posts[i].id === currentPostId) { postTitle = posts[i].title; break; }
+        if (post && post.published) {
+            $btnPublish.style.display = 'none';
+            $btnUpdateGH.style.display = 'inline-flex';
+            $btnUpdateGH.textContent = '&#x1F504; Update on GitHub';
+        } else {
+            $btnPublish.style.display = 'inline-flex';
+            $btnPublish.textContent = '&#x1F680; Publish to GitHub';
+            $btnPublish.disabled = false;
+            $btnUpdateGH.style.display = 'none';
         }
-        showConfirm('Confirm Delete', 'Delete post "' + truncateText(postTitle, 40) + '"? This cannot be undone.', function() {
-            posts = posts.filter(function(p) { return p.id !== currentPostId; });
-            savePosts(posts);
-            resetEditor();
-            renderPostList();
-            showToast('Post deleted', 'success');
-        });
     }
 
-    function clearAll() {
-        showConfirm('Confirm Clear All', 'Delete all ' + posts.length + ' posts? Consider exporting first. This cannot be undone.', function() {
-            posts = [];
-            savePosts(posts);
-            resetEditor();
-            renderPostList();
-            showToast('All posts cleared', 'success');
-        });
-    }
-
-    // ==================== Confirm Modal ====================
-    function showConfirm(title, message, onConfirm) {
-        var overlay = document.createElement('div');
-        overlay.className = 'modal-overlay';
-        overlay.innerHTML = '<div class="modal-box">' +
-            '<h3>' + escapeHtml(title) + '</h3>' +
-            '<p>' + escapeHtml(message) + '</p>' +
-            '<div class="btn-row">' +
-            '<button class="btn btn-outline btn-sm" id="modalCancel">Cancel</button>' +
-            '<button class="btn btn-danger btn-sm" id="modalConfirm">Confirm</button>' +
-            '</div></div>';
-        document.body.appendChild(overlay);
-        overlay.querySelector('#modalCancel').addEventListener('click', function() { document.body.removeChild(overlay); });
-        overlay.querySelector('#modalConfirm').addEventListener('click', function() { document.body.removeChild(overlay); onConfirm(); });
-        overlay.addEventListener('click', function(e) { if (e.target === overlay) document.body.removeChild(overlay); });
-    }
+    // ==================== Auto-slug ====================
+    window._onTitleChange = function() {
+        if (!currentPostId) {
+            $slugInput.value = generateSlug($titleInput.value);
+        }
+    };
 
     // ==================== Export ====================
     function exportDataset() {
@@ -560,54 +1115,41 @@ body {
 
         var postsHTML = '';
         posts.forEach(function(p) {
-            postsHTML += '  <article data-id="' + escapeHtml(p.id) + '" data-publish-time="' + escapeHtml(p.publishTime) + '">\n';
+            postsHTML += '  <article data-id="' + escapeHtml(p.id) + '" data-publish-time="' + escapeHtml(p.publishTime) + '"' + (p.published ? ' data-published="true"' : '') + '>\n';
             postsHTML += '    <header>\n';
             postsHTML += '      <h2 class="post-title">' + escapeHtml(p.title) + '</h2>\n';
             postsHTML += '      <div class="post-meta">\n';
             postsHTML += '        <span class="post-author">Author: ' + escapeHtml(p.author || 'Anonymous') + '</span>\n';
             postsHTML += '        <time datetime="' + escapeHtml(p.publishTime) + '">Publish Time: ' + formatTime(p.publishTime) + '</time>\n';
             postsHTML += '        <span class="post-created">Created: ' + formatTime(p.createdAt) + '</span>\n';
-            postsHTML += '        <span class="post-updated">Updated: ' + formatTime(p.updatedAt) + '</span>\n';
+            if (p.published) postsHTML += '        <span class="post-url">' + escapeHtml(p.publishedUrl) + '</span>\n';
             postsHTML += '      </div>\n';
             postsHTML += '    </header>\n';
-            postsHTML += '    <div class="post-content">\n';
-            postsHTML += escapeHtml(p.content).replace(/\n/g, '\n      <br>\n');
-            postsHTML += '\n    </div>\n';
+            postsHTML += '    <div class="post-content">\n' + escapeHtml(p.content).replace(/\n/g, '\n      <br>\n') + '\n    </div>\n';
             postsHTML += '  </article>\n';
         });
 
         var datasetJSON = JSON.stringify(posts, null, 2);
-
         var html = '<!DOCTYPE html>\n<html lang="en">\n<head>\n' +
             '<meta charset="UTF-8">\n' +
-            '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
             '<title>Post Dataset</title>\n' +
-            '<meta name="description" content="Post dataset - Exported: ' + formatTime(exportTime) + ' - ' + posts.length + ' posts">\n' +
             '<meta name="dataset-export-time" content="' + exportTime + '">\n' +
             '<meta name="dataset-post-count" content="' + posts.length + '">\n' +
             '<style>\n' +
             'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f9fafb; color: #2c3e50; line-height: 1.6; }\n' +
             'h1 { color: #4f6ef6; border-bottom: 3px solid #4f6ef6; padding-bottom: 12px; }\n' +
-            '.dataset-info { background: #eef0fd; padding: 16px 20px; border-radius: 8px; margin-bottom: 30px; font-size: 0.9rem; color: #555; }\n' +
+            '.dataset-info { background: #eef0fd; padding: 16px 20px; border-radius: 8px; margin-bottom: 30px; font-size: 0.9rem; }\n' +
             'article { background: #fff; border: 1px solid #e1e5ea; border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }\n' +
-            'article h2 { margin: 0 0 10px 0; font-size: 1.2rem; color: #2c3e50; }\n' +
+            'article h2 { margin: 0 0 10px 0; font-size: 1.2rem; }\n' +
             '.post-meta { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.82rem; color: #7f8c8d; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #eee; }\n' +
             '.post-meta time { color: #4f6ef6; font-weight: 600; }\n' +
             '.post-content { font-size: 0.95rem; white-space: pre-wrap; }\n' +
-            'footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #ddd; font-size: 0.8rem; color: #999; text-align: center; }\n' +
             '</style>\n</head>\n<body>\n' +
             '<h1>&#x1F4CA; Post Dataset</h1>\n' +
-            '<div class="dataset-info">\n' +
-            '  <strong>Export Time:</strong> ' + formatTime(exportTime) + '<br>\n' +
-            '  <strong>Total Posts:</strong> ' + posts.length + '<br>\n' +
-            '  <strong>Format:</strong> Each post wrapped in &lt;article&gt;, publish time in &lt;time datetime="..."&gt;, with embedded JSON.\n' +
-            '</div>\n<hr>\n\n' +
+            '<div class="dataset-info"><strong>Export Time:</strong> ' + formatTime(exportTime) + '<br><strong>Total Posts:</strong> ' + posts.length + '</div>\n<hr>\n\n' +
             postsHTML +
             '\n<hr>\n<footer>Generated by Post Dataset Manager | ' + formatTime(exportTime) + '</footer>\n\n' +
-            '<!-- Embedded JSON for programmatic access -->\n' +
-            '<script type="application/json" id="dataset-json">\n' +
-            datasetJSON +
-            '\n</' + 'script>\n</body>\n</html>';
+            '<script type="application/json" id="dataset-json">\n' + datasetJSON + '\n</' + 'script>\n</body>\n</html>';
 
         downloadFile('post-dataset_' + now.toISOString().replace(/[:.]/g, '-').substring(0, 16) + '.html', html);
         showToast('Dataset exported (' + posts.length + ' posts)', 'success');
@@ -629,19 +1171,17 @@ body {
             var html = e.target.result;
             var jsonMatch = html.match(/<script\s+type=["']application\/json["'][^>]*id=["']dataset-json["'][^>]*>([\s\S]*?)<\/script>/i);
             if (jsonMatch) {
-                try { var imported = JSON.parse(jsonMatch[1]); mergeImportedPosts(imported); return; }
-                catch (err) { /* fallback */ }
+                try { var imported = JSON.parse(jsonMatch[1]); mergeImportedPosts(imported); return; } catch (err) {}
             }
             var anyJsonMatch = html.match(/<script\s+type=["']application\/json["'][^>]*>([\s\S]*?)<\/script>/i);
             if (anyJsonMatch) {
-                try { var imported2 = JSON.parse(anyJsonMatch[1]); mergeImportedPosts(imported2); return; }
-                catch (err) { /* fallback */ }
+                try { var imported2 = JSON.parse(anyJsonMatch[1]); mergeImportedPosts(imported2); return; } catch (err) {}
             }
             try {
                 var jsonLike = html.match(/\[\s*\{[\s\S]*\}\s*\]/);
                 if (jsonLike) { var imported3 = JSON.parse(jsonLike[0]); mergeImportedPosts(imported3); return; }
-            } catch (err) { /* give up */ }
-            showToast('Import failed: No valid post data found in file', 'error');
+            } catch (err) {}
+            showToast('Import failed: No valid post data found', 'error');
         };
         reader.onerror = function() { showToast('File read failed', 'error'); };
         reader.readAsText(file);
@@ -658,17 +1198,17 @@ body {
             if (!p.id || !p.title) { skippedCount++; return; }
             if (existingIds[p.id]) { skippedCount++; return; }
             posts.push({
-                id: p.id, title: p.title || '', author: p.author || '',
-                content: p.content || '',
+                id: p.id, title: p.title || '', slug: p.slug || generateSlug(p.title),
+                author: p.author || '', content: p.content || '',
                 publishTime: p.publishTime || p.createdAt || nowISO(),
-                createdAt: p.createdAt || nowISO(), updatedAt: p.updatedAt || nowISO()
+                createdAt: p.createdAt || nowISO(), updatedAt: p.updatedAt || nowISO(),
+                published: p.published || false, publishedUrl: p.publishedUrl || '', publishedSha: p.publishedSha || ''
             });
-            existingIds[p.id] = true;
-            addedCount++;
+            existingIds[p.id] = true; addedCount++;
         });
         savePosts(posts); renderPostList(); resetEditor();
         var msg = 'Import done: ' + addedCount + ' added';
-        if (skippedCount > 0) msg += ', ' + skippedCount + ' skipped (duplicate or incomplete)';
+        if (skippedCount > 0) msg += ', ' + skippedCount + ' skipped';
         showToast(msg, 'success');
     }
 
@@ -678,10 +1218,13 @@ body {
     $btnSave.addEventListener('click', saveOrUpdatePost);
     $btnNew.addEventListener('click', function() { resetEditor(); renderPostList(); });
     $btnDelete.addEventListener('click', deletePost);
+    $btnPublish.addEventListener('click', publishPostToGitHub);
+    $btnUpdateGH.addEventListener('click', updatePostOnGitHub);
+    $btnUnpublish.addEventListener('click', unpublishPostFromGitHub);
     $btnSetTime.addEventListener('click', updatePublishTimeOnly);
     $publishTimeInput.addEventListener('change', function() {
         var val = $publishTimeInput.value;
-        if (val) { $timeDisplay.textContent = formatTime(val); }
+        if (val) $timeDisplay.textContent = formatTime(val);
     });
     $btnExport.addEventListener('click', exportDataset);
     $btnImport.addEventListener('click', function() { $importFileInput.click(); });
@@ -693,21 +1236,33 @@ body {
     });
     $btnClearAll.addEventListener('click', clearAll);
 
+    // Settings
+    document.getElementById('btnSettings').addEventListener('click', openSettings);
+    document.getElementById('btnSettingsSave').addEventListener('click', saveGHSettings);
+    document.getElementById('btnSettingsCancel').addEventListener('click', closeSettings);
+    document.getElementById('btnTestConnection').addEventListener('click', testGHConnection);
+    $settingsModal.addEventListener('click', function(e) { if (e.target === $settingsModal) closeSettings(); });
+
+    // Global post selection
     window._selectPost = function(postId) {
         if (currentPostId === postId) { currentPostId = null; resetEditor(); renderPostList(); return; }
         loadPostToEditor(postId);
         renderPostList();
     };
 
+    // Keyboard shortcuts
     document.addEventListener('keydown', function(e) {
         if ((e.ctrlKey || e.metaKey) && e.key === 's') { e.preventDefault(); saveOrUpdatePost(); }
-        if (e.key === 'Escape' && currentPostId) { resetEditor(); renderPostList(); showToast('Edit cancelled', ''); }
+        if (e.key === 'Escape') {
+            if ($settingsModal.style.display === 'flex') { closeSettings(); return; }
+            if (currentPostId) { resetEditor(); renderPostList(); showToast('Edit cancelled', ''); }
+        }
     });
 
     // ==================== Utils ====================
     function escapeHtml(str) {
         if (!str) return '';
-        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
 
     function truncateText(text, maxLen) {
@@ -720,13 +1275,15 @@ body {
     function init() {
         $publishTimeInput.value = toDatetimeLocal(nowISO());
         $timeDisplay.textContent = formatTime(nowISO());
+        updateSettingsIndicator();
+        updatePublishButtons();
         renderPostList();
     }
 
     init();
-    console.log('Post Dataset Manager ready');
-    console.log('  - ' + posts.length + ' posts loaded');
-    console.log('  - Data stored in localStorage: ' + STORAGE_KEY);
+    console.log('Post Dataset Manager ready (with GitHub integration)');
+    console.log('  - ' + posts.length + ' posts loaded (' + posts.filter(function(p){return p.published;}).length + ' published)');
+    console.log('  - GitHub: ' + (isGHConfigured() ? 'Configured' : 'Not configured'));
     console.log('  - Ctrl+S to save, Esc to cancel');
 })();
 </script>

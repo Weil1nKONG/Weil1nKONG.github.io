@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>帖子数据集管理工具</title>
+<style>
+/* ========== 全局样式 ========== */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+:root {
+    --bg: #f5f6fa;
+    --card-bg: #ffffff;
+    --primary: #4f6ef6;
+    --primary-hover: #3b5de7;
+    --danger: #e74c3c;
+    --danger-hover: #c0392b;
+    --text: #2c3e50;
+    --text-secondary: #7f8c8d;
+    --border: #e1e5ea;
+    --shadow: 0 2px 8px rgba(0,0,0,0.06);
+    --shadow-hover: 0 4px 16px rgba(0,0,0,0.10);
+    --radius: 10px;
+    --transition: 0.2s ease;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+/* ========== 顶部导航栏 ========== */
+.header {
+    background: var(--card-bg);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.header-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.header-title .icon {
+    font-size: 1.5rem;
+}
+
+.header-stats {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    background: var(--bg);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 500;
+}
+
+/* ========== 主布局 ========== */
+.main-container {
+    display: flex;
+    gap: 24px;
+    padding: 24px 32px;
+    max-width: 1400px;
+    margin: 0 auto;
+    min-height: calc(100vh - 140px);
+}
+
+/* ========== 左侧：帖子列表 ========== */
+.list-panel {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.search-bar {
+    display: flex;
+    gap: 10px;
+}
+
+.search-bar input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color var(--transition);
+    background: var(--card-bg);
+}
+
+.search-bar input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 110, 246, 0.1);
+}
+
+.search-bar select {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    background: var(--card-bg);
+    outline: none;
+    cursor: pointer;
+    color: var(--text);
+}
+
+.post-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    flex: 1;
+    padding-right: 4px;
+}
+
+.post-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.post-list::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 3px;
+}
+
+/* ========== 帖子卡片 ========== */
+.post-card {
+    background: var(--card-bg);
+    border: 2px solid transparent;
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    cursor: pointer;
+    transition: all var(--transition);
+    box-shadow: var(--shadow);
+    position: relative;
+}
+
+.post-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-1px);
+}
+
+.post-card.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 110, 246, 0.12);
+}
+
+.post-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.post-card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.post-card-time {
+    font-size: 0.8rem;
+    color: var(--primary);
+    white-space: nowrap;
+    font-weight: 500;
+    background: rgba(79, 110, 246, 0.08);
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+
+.post-card-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+.post-card-preview {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-top: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.post-card-actions {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: none;
+    gap: 6px;
+}
+
+.post-card:hover .post-card-actions {
+    display: flex;
+}
+
+.post-card.active .post-card-actions {
+    display: flex;
+}
+
+/* ========== 右侧：编辑面板 ========== */
+.edit-panel {
+    width: 420px;
+    flex-shrink: 0;
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    height: fit-content;
+    position: sticky;
+    top: 90px;
+}
+
+.panel-title {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    padding-bottom: 12px;
+    border-bottom: 2px solid var(--bg);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.form-group input,
+.form-group textarea {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-family: inherit;
+    outline: none;
+    transition: border-color var(--transition);
+    resize: vertical;
+    background: var(--bg);
+}
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(79, 110, 246, 0.08);
+    background: var(--card-bg);
+}
+
+.form-group textarea {
+    min-height: 160px;
+}
+
+/* ========== 发布时间编辑区（核心功能） ========== */
+.time-edit-section {
+    background: rgba(79, 110, 246, 0.04);
+    border: 1px dashed var(--primary);
+    border-radius: var(--radius);
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.time-edit-section .section-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.time-display {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.time-edit-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.time-edit-row input[type="datetime-local"] {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    outline: none;
+    background: var(--card-bg);
+}
+
+.time-edit-row input[type="datetime-local"]:focus {
+    border-color: var(--primary);
+}
+
+.btn-set-time {
+    padding: 8px 16px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: background var(--transition);
+}
+
+.btn-set-time:hover {
+    background: var(--primary-hover);
+}
+
+/* ========== 按钮样式 ========== */
+.btn-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all var(--transition);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.btn-outline {
+    background: transparent;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+}
+
+.btn-outline:hover {
+    background: rgba(79, 110, 246, 0.06);
+}
+
+.btn-danger {
+    background: transparent;
+    color: var(--danger);
+    border: 2px solid var(--danger);
+}
+
+.btn-danger:hover {
+    background: var(--danger);
+    color: #fff;
+}
+
+.btn-sm {
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    border-radius: 6px;
+}
+
+/* ========== 底部操作栏 ========== */
+.footer-bar {
+    background: var(--card-bg);
+    border-top: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.footer-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.footer-info {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+}
+
+/* ========== Toast 提示 ========== */
+.toast {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    background: #2c3e50;
+    color: #fff;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    z-index: 9999;
+    opacity: 0;
+    transform: translateY(-10px);
+    animation: toastIn 0.3s forwards, toastOut 0.3s 2.5s forwards;
+    pointer-events: none;
+}
+
+@keyframes toastIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastOut {
+    to { opacity: 0; transform: translateY(-10px); }
+}
+
+.toast.success { background: #27ae60; }
+.toast.error { background: #e74c3c; }
+
+/* ========== 空状态 ========== */
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-secondary);
+}
+
+.empty-state .icon {
+    font-size: 3rem;
+    margin-bottom: 12px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+    color: var(--text);
+}
+
+.empty-state p {
+    font-size: 0.9rem;
+}
+
+/* ========== 确认对话框 ========== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.modal-box {
+    background: var(--card-bg);
+    border-radius: var(--radius);
+    padding: 28px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    text-align: center;
+}
+
+.modal-box h3 {
+    margin-bottom: 12px;
+}
+
+.modal-box p {
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+}
+
+.modal-box .btn-row {
+    justify-content: center;
+}
+
+/* ========== 响应式 ========== */
+@media (max-width: 900px) {
+    .main-container {
+        flex-direction: column;
+        padding: 16px;
+    }
+
+    .edit-panel {
+        width: 100%;
+        position: static;
+    }
+
+    .header {
+        padding: 12px 16px;
+    }
+
+    .footer-bar {
+        padding: 12px 16px;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* 隐藏的文件输入 */
+.hidden-input {
+    display: none;
+}
+</style>
+</head>
+<body>
+
+<!-- ========== 顶部导航 ========== -->
+<header class="header">
+    <div class="header-title">
+        <span class="icon">📊</span>
+        <span>帖子数据集管理工具</span>
+    </div>
+    <div class="header-stats" id="headerStats">共 0 条帖子</div>
+</header>
+
+<!-- ========== 主体 ========== -->
+<div class="main-container">
+
+    <!-- 左侧：帖子列表 -->
+    <div class="list-panel">
+        <div class="search-bar">
+            <input type="text" id="searchInput" placeholder="🔍 搜索帖子标题、作者或内容...">
+            <select id="sortSelect">
+                <option value="newest">发布时间 ↓ (最新)</option>
+                <option value="oldest">发布时间 ↑ (最早)</option>
+                <option value="created">创建时间 ↓</option>
+            </select>
+        </div>
+        <div class="post-list" id="postList">
+            <div class="empty-state">
+                <span class="icon">📝</span>
+                <h3>还没有帖子</h3>
+                <p>在右侧面板中创建你的第一条帖子吧</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 右侧：编辑面板 -->
+    <aside class="edit-panel" id="editPanel">
+        <div class="panel-title" id="panelTitle">✍️ 发布新帖子</div>
+
+        <div class="form-group">
+            <label>标题</label>
+            <input type="text" id="titleInput" placeholder="输入帖子标题...">
+        </div>
+
+        <div class="form-group">
+            <label>作者</label>
+            <input type="text" id="authorInput" placeholder="输入作者名称...">
+        </div>
+
+        <div class="form-group">
+            <label>内容</label>
+            <textarea id="contentInput" placeholder="输入帖子正文内容...&#10;&#10;支持多行文本，将作为数据集的核心字段。"></textarea>
+        </div>
+
+        <!-- 发布时间编辑区（核心功能） -->
+        <div class="time-edit-section" id="timeEditSection">
+            <div class="section-label">⏰ 发布时间 <span style="font-weight:400;font-size:0.75rem;color:#e67e22;">（可独立编辑）</span></div>
+            <div class="time-display" id="timeDisplay">未设置</div>
+            <div class="time-edit-row">
+                <input type="datetime-local" id="publishTimeInput">
+                <button class="btn-set-time" id="btnSetTime" title="单独更新发布时间">更新</button>
+            </div>
+        </div>
+
+        <div class="btn-row">
+            <button class="btn btn-primary" id="btnSave">💾 发布帖子</button>
+            <button class="btn btn-outline" id="btnNew" style="display:none;">➕ 新建</button>
+        </div>
+
+        <div class="btn-row" id="editActions" style="display:none;">
+            <button class="btn btn-sm btn-danger" id="btnDelete">🗑️ 删除此帖</button>
+        </div>
+    </aside>
+
+</div>
+
+<!-- ========== 底部操作栏 ========== -->
+<footer class="footer-bar">
+    <div class="footer-info" id="footerInfo">💡 提示：发布时间可独立编辑，不影响帖子内容</div>
+    <div class="footer-actions">
+        <button class="btn btn-sm btn-outline" id="btnExport">📥 导出数据集 (HTML)</button>
+        <button class="btn btn-sm btn-outline" id="btnImport">📤 导入数据集</button>
+        <button class="btn btn-sm btn-danger" id="btnClearAll">🗑️ 清空全部</button>
+    </div>
+    <input type="file" id="importFileInput" class="hidden-input" accept=".html,.htm">
+</footer>
+
+<!-- Toast 容器 -->
+<div id="toastContainer"></div>
+
+<script>
+(function() {
+    'use strict';
+
+    // ==================== 数据管理 ====================
+    const STORAGE_KEY = 'post_dataset_tool_data';
+
+    function loadPosts() {
+        try {
+            const raw = localStorage.getItem(STORAGE_KEY);
+            return raw ? JSON.parse(raw) : [];
+        } catch (e) {
+            console.error('数据加载失败:', e);
+            return [];
+        }
+    }
+
+    function savePosts(posts) {
+        try {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(posts));
+        } catch (e) {
+            showToast('保存失败：存储空间不足，请导出数据后清理', 'error');
+        }
+    }
+
+    function generateId() {
+        return 'post_' + Date.now() + '_' + Math.random().toString(36).substring(2, 9);
+    }
+
+    function formatTime(isoString) {
+        if (!isoString) return '未设置';
+        try {
+            const d = new Date(isoString);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            const h = String(d.getHours()).padStart(2, '0');
+            const min = String(d.getMinutes()).padStart(2, '0');
+            return `${y}-${m}-${day} ${h}:${min}`;
+        } catch (e) {
+            return '格式错误';
+        }
+    }
+
+    function toDatetimeLocal(isoString) {
+        if (!isoString) return '';
+        try {
+            // datetime-local 需要 "YYYY-MM-DDTHH:MM" 格式
+            return isoString.substring(0, 16);
+        } catch (e) {
+            return '';
+        }
+    }
+
+    function nowISO() {
+        const d = new Date();
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        const h = String(d.getHours()).padStart(2, '0');
+        const min = String(d.getMinutes()).padStart(2, '0');
+        return `${y}-${m}-${day}T${h}:${min}`;
+    }
+
+    // ==================== 状态管理 ====================
+    let posts = loadPosts();
+    let currentPostId = null;   // 当前正在编辑的帖子 ID（null = 新建模式）
+    let currentFilter = '';
+    let currentSort = 'newest';
+
+    // ==================== DOM 引用 ====================
+    const $postList = document.getElementById('postList');
+    const $searchInput = document.getElementById('searchInput');
+    const $sortSelect = document.getElementById('sortSelect');
+    const $titleInput = document.getElementById('titleInput');
+    const $authorInput = document.getElementById('authorInput');
+    const $contentInput = document.getElementById('contentInput');
+    const $publishTimeInput = document.getElementById('publishTimeInput');
+    const $timeDisplay = document.getElementById('timeDisplay');
+    const $btnSave = document.getElementById('btnSave');
+    const $btnNew = document.getElementById('btnNew');
+    const $btnDelete = document.getElementById('btnDelete');
+    const $btnSetTime = document.getElementById('btnSetTime');
+    const $btnExport = document.getElementById('btnExport');
+    const $btnImport = document.getElementById('btnImport');
+    const $btnClearAll = document.getElementById('btnClearAll');
+    const $importFileInput = document.getElementById('importFileInput');
+    const $editActions = document.getElementById('editActions');
+    const $panelTitle = document.getElementById('panelTitle');
+    const $headerStats = document.getElementById('headerStats');
+    const $footerInfo = document.getElementById('footerInfo');
+    const $toastContainer = document.getElementById('toastContainer');
+
+    // ==================== Toast ====================
+    function showToast(msg, type) {
+        type = type || '';
+        const el = document.createElement('div');
+        el.className = 'toast ' + type;
+        el.textContent = msg;
+        $toastContainer.appendChild(el);
+        setTimeout(function() {
+            if (el.parentNode) el.parentNode.removeChild(el);
+        }, 3000);
+    }
+
+    // ==================== 渲染 ====================
+    function getFilteredAndSortedPosts() {
+        let result = posts.slice();
+
+        // 过滤
+        if (currentFilter.trim()) {
+            const kw = currentFilter.trim().toLowerCase();
+            result = result.filter(function(p) {
+                return (p.title && p.title.toLowerCase().indexOf(kw) !== -1) ||
+                       (p.author && p.author.toLowerCase().indexOf(kw) !== -1) ||
+                       (p.content && p.content.toLowerCase().indexOf(kw) !== -1);
+            });
+        }
+
+        // 排序
+        if (currentSort === 'newest') {
+            result.sort(function(a, b) { return (b.publishTime || '').localeCompare(a.publishTime || ''); });
+        } else if (currentSort === 'oldest') {
+            result.sort(function(a, b) { return (a.publishTime || '').localeCompare(b.publishTime || ''); });
+        } else if (currentSort === 'created') {
+            result.sort(function(a, b) { return (b.createdAt || '').localeCompare(a.createdAt || ''); });
+        }
+
+        return result;
+    }
+
+    function renderPostList() {
+        var filtered = getFilteredAndSortedPosts();
+
+        if (filtered.length === 0) {
+            $postList.innerHTML = '<div class="empty-state"><span class="icon">📝</span><h3>' +
+                (posts.length === 0 ? '还没有帖子' : '没有匹配的帖子') +
+                '</h3><p>' +
+                (posts.length === 0 ? '在右侧面板中创建你的第一条帖子吧' : '尝试修改搜索关键词') +
+                '</p></div>';
+        } else {
+            var html = '';
+            filtered.forEach(function(p) {
+                var activeClass = (p.id === currentPostId) ? ' active' : '';
+                html += '<div class="post-card' + activeClass + '" data-id="' + p.id + '" onclick="window._selectPost(\'' + p.id + '\')">';
+                html += '<div class="post-card-header">';
+                html += '<span class="post-card-title">' + escapeHtml(p.title || '无标题') + '</span>';
+                html += '<span class="post-card-time">🕒 ' + formatTime(p.publishTime) + '</span>';
+                html += '</div>';
+                html += '<div class="post-card-meta">';
+                html += '<span>✍️ ' + escapeHtml(p.author || '匿名') + '</span>';
+                html += '<span>📅 创建于 ' + formatTime(p.createdAt) + '</span>';
+                html += '</div>';
+                html += '<div class="post-card-preview">' + escapeHtml(truncateText(p.content, 80)) + '</div>';
+                html += '</div>';
+            });
+            $postList.innerHTML = html;
+        }
+
+        updateStats();
+    }
+
+    function updateStats() {
+        var filtered = getFilteredAndSortedPosts();
+        $headerStats.textContent = '共 ' + posts.length + ' 条帖子' +
+            (currentFilter ? '（显示 ' + filtered.length + ' 条）' : '');
+    }
+
+    function loadPostToEditor(postId) {
+        var post = null;
+        for (var i = 0; i < posts.length; i++) {
+            if (posts[i].id === postId) { post = posts[i]; break; }
+        }
+        if (!post) return;
+
+        currentPostId = post.id;
+        $panelTitle.textContent = '✏️ 编辑帖子';
+        $titleInput.value = post.title || '';
+        $authorInput.value = post.author || '';
+        $contentInput.value = post.content || '';
+        $publishTimeInput.value = toDatetimeLocal(post.publishTime);
+        $timeDisplay.textContent = formatTime(post.publishTime);
+        $btnSave.textContent = '💾 保存修改';
+        $btnNew.style.display = 'inline-flex';
+        $editActions.style.display = 'flex';
+        $footerInfo.textContent = '📝 正在编辑: "' + truncateText(post.title, 30) + '" — 修改发布时间请在下方单独更新';
+    }
+
+    function resetEditor() {
+        currentPostId = null;
+        $panelTitle.textContent = '✍️ 发布新帖子';
+        $titleInput.value = '';
+        $authorInput.value = '';
+        $contentInput.value = '';
+        $publishTimeInput.value = toDatetimeLocal(nowISO());
+        $timeDisplay.textContent = formatTime(nowISO());
+        $btnSave.textContent = '💾 发布帖子';
+        $btnNew.style.display = 'none';
+        $editActions.style.display = 'none';
+        $footerInfo.textContent = '💡 提示：发布时间可独立编辑，不影响帖子内容';
+    }
+
+    // ==================== 操作 ====================
+    function saveOrUpdatePost() {
+        var title = $titleInput.value.trim();
+        var content = $contentInput.value.trim();
+
+        if (!title) {
+            showToast('请输入帖子标题', 'error');
+            $titleInput.focus();
+            return;
+        }
+        if (!content) {
+            showToast('请输入帖子内容', 'error');
+            $contentInput.focus();
+            return;
+        }
+
+        var publishTime = $publishTimeInput.value;
+        if (!publishTime) {
+            publishTime = nowISO();
+            $publishTimeInput.value = toDatetimeLocal(publishTime);
+        }
+
+        var now = nowISO();
+
+        if (currentPostId) {
+            // 更新已有帖子
+            for (var i = 0; i < posts.length; i++) {
+                if (posts[i].id === currentPostId) {
+                    posts[i].title = title;
+                    posts[i].author = $authorInput.value.trim();
+                    posts[i].content = content;
+                    posts[i].publishTime = publishTime;
+                    posts[i].updatedAt = now;
+                    break;
+                }
+            }
+            savePosts(posts);
+            showToast('帖子已更新', 'success');
+        } else {
+            // 新建帖子
+            var newPost = {
+                id: generateId(),
+                title: title,
+                author: $authorInput.value.trim(),
+                content: content,
+                publishTime: publishTime,
+                createdAt: now,
+                updatedAt: now
+            };
+            posts.push(newPost);
+            savePosts(posts);
+            currentPostId = newPost.id;
+            showToast('帖子发布成功', 'success');
+            loadPostToEditor(newPost.id);
+        }
+
+        renderPostList();
+    }
+
+    function updatePublishTimeOnly() {
+        if (!currentPostId) {
+            // 新建模式下也允许预设置时间
+            var newTime = $publishTimeInput.value;
+            if (newTime) {
+                $timeDisplay.textContent = formatTime(newTime);
+                showToast('发布时间已预设为 ' + formatTime(newTime), 'success');
+            }
+            return;
+        }
+
+        var newTime = $publishTimeInput.value;
+        if (!newTime) {
+            showToast('请选择一个时间', 'error');
+            return;
+        }
+
+        for (var i = 0; i < posts.length; i++) {
+            if (posts[i].id === currentPostId) {
+                posts[i].publishTime = newTime;
+                posts[i].updatedAt = nowISO();
+                break;
+            }
+        }
+        savePosts(posts);
+        $timeDisplay.textContent = formatTime(newTime);
+        renderPostList();
+        showToast('发布时间已更新为 ' + formatTime(newTime), 'success');
+    }
+
+    function deletePost() {
+        if (!currentPostId) return;
+
+        var postTitle = '';
+        for (var i = 0; i < posts.length; i++) {
+            if (posts[i].id === currentPostId) { postTitle = posts[i].title; break; }
+        }
+
+        showConfirm('确认删除', '确定要删除帖子 "' + truncateText(postTitle, 40) + '" 吗？此操作不可恢复。', function() {
+            posts = posts.filter(function(p) { return p.id !== currentPostId; });
+            savePosts(posts);
+            resetEditor();
+            renderPostList();
+            showToast('帖子已删除', 'success');
+        });
+    }
+
+    function clearAll() {
+        showConfirm('确认清空', '确定要清空全部 ' + posts.length + ' 条帖子吗？建议先导出备份。此操作不可恢复。', function() {
+            posts = [];
+            savePosts(posts);
+            resetEditor();
+            renderPostList();
+            showToast('全部帖子已清空', 'success');
+        });
+    }
+
+    // ==================== 确认对话框 ====================
+    function showConfirm(title, message, onConfirm) {
+        var overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        overlay.innerHTML = '<div class="modal-box">' +
+            '<h3>' + escapeHtml(title) + '</h3>' +
+            '<p>' + escapeHtml(message) + '</p>' +
+            '<div class="btn-row">' +
+            '<button class="btn btn-outline btn-sm" id="modalCancel">取消</button>' +
+            '<button class="btn btn-danger btn-sm" id="modalConfirm">确认</button>' +
+            '</div></div>';
+        document.body.appendChild(overlay);
+
+        overlay.querySelector('#modalCancel').addEventListener('click', function() {
+            document.body.removeChild(overlay);
+        });
+        overlay.querySelector('#modalConfirm').addEventListener('click', function() {
+            document.body.removeChild(overlay);
+            onConfirm();
+        });
+        overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) document.body.removeChild(overlay);
+        });
+    }
+
+    // ==================== 导出数据集 ====================
+    function exportDataset() {
+        if (posts.length === 0) {
+            showToast('没有数据可导出', 'error');
+            return;
+        }
+
+        var now = new Date();
+        var exportTime = now.toISOString();
+
+        var postsHTML = '';
+        posts.forEach(function(p) {
+            postsHTML += '  <article data-id="' + escapeHtml(p.id) + '" data-publish-time="' + escapeHtml(p.publishTime) + '">\n';
+            postsHTML += '    <header>\n';
+            postsHTML += '      <h2 class="post-title">' + escapeHtml(p.title) + '</h2>\n';
+            postsHTML += '      <div class="post-meta">\n';
+            postsHTML += '        <span class="post-author">作者：' + escapeHtml(p.author || '匿名') + '</span>\n';
+            postsHTML += '        <time datetime="' + escapeHtml(p.publishTime) + '">发布时间：' + formatTime(p.publishTime) + '</time>\n';
+            postsHTML += '        <span class="post-created">创建时间：' + formatTime(p.createdAt) + '</span>\n';
+            postsHTML += '        <span class="post-updated">最后修改：' + formatTime(p.updatedAt) + '</span>\n';
+            postsHTML += '      </div>\n';
+            postsHTML += '    </header>\n';
+            postsHTML += '    <div class="post-content">\n';
+            postsHTML += escapeHtml(p.content).replace(/\n/g, '\n      <br>\n');
+            postsHTML += '\n    </div>\n';
+            postsHTML += '  </article>\n';
+        });
+
+        var datasetJSON = JSON.stringify(posts, null, 2);
+
+        var html = '<!DOCTYPE html>\n<html lang="zh-CN">\n<head>\n' +
+            '<meta charset="UTF-8">\n' +
+            '<meta name="viewport" content="width=device-width, initial-scale=1.0">\n' +
+            '<title>帖子数据集</title>\n' +
+            '<meta name="description" content="帖子数据集 - 导出时间: ' + formatTime(exportTime) + ' - 共 ' + posts.length + ' 条帖子">\n' +
+            '<meta name="dataset-export-time" content="' + exportTime + '">\n' +
+            '<meta name="dataset-post-count" content="' + posts.length + '">\n' +
+            '<style>\n' +
+            'body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", sans-serif; max-width: 800px; margin: 40px auto; padding: 20px; background: #f9fafb; color: #2c3e50; line-height: 1.6; }\n' +
+            'h1 { color: #4f6ef6; border-bottom: 3px solid #4f6ef6; padding-bottom: 12px; }\n' +
+            '.dataset-info { background: #eef0fd; padding: 16px 20px; border-radius: 8px; margin-bottom: 30px; font-size: 0.9rem; color: #555; }\n' +
+            'article { background: #fff; border: 1px solid #e1e5ea; border-radius: 10px; padding: 20px 24px; margin-bottom: 20px; box-shadow: 0 2px 6px rgba(0,0,0,0.04); }\n' +
+            'article h2 { margin: 0 0 10px 0; font-size: 1.2rem; color: #2c3e50; }\n' +
+            '.post-meta { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.82rem; color: #7f8c8d; margin-bottom: 14px; padding-bottom: 12px; border-bottom: 1px solid #eee; }\n' +
+            '.post-meta time { color: #4f6ef6; font-weight: 600; }\n' +
+            '.post-content { font-size: 0.95rem; white-space: pre-wrap; }\n' +
+            'footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid #ddd; font-size: 0.8rem; color: #999; text-align: center; }\n' +
+            '</style>\n</head>\n<body>\n' +
+            '<h1>📊 帖子数据集</h1>\n' +
+            '<div class="dataset-info">\n' +
+            '  <strong>导出时间：</strong>' + formatTime(exportTime) + '<br>\n' +
+            '  <strong>帖子总数：</strong>' + posts.length + ' 条<br>\n' +
+            '  <strong>数据格式：</strong>每篇文章以 &lt;article&gt; 标签包裹，发布时间使用 &lt;time datetime="..."&gt; 标记，附带完整 JSON 数据。\n' +
+            '</div>\n<hr>\n\n' +
+            postsHTML +
+            '\n<hr>\n<footer>由 帖子数据集管理工具 生成 | ' + formatTime(exportTime) + '</footer>\n\n' +
+            '<!-- 内嵌 JSON 数据，供程序读取 -->\n' +
+            '<script type="application/json" id="dataset-json">\n' +
+            datasetJSON +
+            '\n</' + 'script>\n</body>\n</html>';
+
+        downloadFile('帖子数据集_' + now.toISOString().replace(/[:.]/g, '-').substring(0, 16) + '.html', html);
+        showToast('数据集已导出（' + posts.length + ' 条帖子）', 'success');
+    }
+
+    function downloadFile(filename, content) {
+        var blob = new Blob([content], { type: 'text/html;charset=utf-8' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+    }
+
+    // ==================== 导入数据集 ====================
+    function importDataset(file) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var html = e.target.result;
+
+            // 尝试从 <script type="application/json"> 中提取 JSON
+            var jsonMatch = html.match(/<script\s+type=["']application\/json["'][^>]*id=["']dataset-json["'][^>]*>([\s\S]*?)<\/script>/i);
+            if (jsonMatch) {
+                try {
+                    var imported = JSON.parse(jsonMatch[1]);
+                    mergeImportedPosts(imported);
+                    return;
+                } catch (err) {
+                    // JSON 解析失败，尝试回退解析
+                }
+            }
+
+            // 回退：尝试从任意 application/json script 标签解析
+            var anyJsonMatch = html.match(/<script\s+type=["']application\/json["'][^>]*>([\s\S]*?)<\/script>/i);
+            if (anyJsonMatch) {
+                try {
+                    var imported2 = JSON.parse(anyJsonMatch[1]);
+                    mergeImportedPosts(imported2);
+                    return;
+                } catch (err) {
+                    // 继续尝试
+                }
+            }
+
+            // 再回退：尝试解析内嵌的 JSON
+            try {
+                // 查找看起来像 JSON 数组的内容
+                var jsonLike = html.match(/\[\s*\{[\s\S]*\}\s*\]/);
+                if (jsonLike) {
+                    var imported3 = JSON.parse(jsonLike[0]);
+                    mergeImportedPosts(imported3);
+                    return;
+                }
+            } catch (err) {
+                // 放弃
+            }
+
+            showToast('导入失败：未在文件中找到有效的帖子数据', 'error');
+        };
+        reader.onerror = function() {
+            showToast('文件读取失败', 'error');
+        };
+        reader.readAsText(file);
+    }
+
+    function mergeImportedPosts(importedPosts) {
+        if (!Array.isArray(importedPosts) || importedPosts.length === 0) {
+            showToast('导入失败：数据格式不正确或为空', 'error');
+            return;
+        }
+
+        var addedCount = 0;
+        var skippedCount = 0;
+        var existingIds = {};
+        posts.forEach(function(p) { existingIds[p.id] = true; });
+
+        importedPosts.forEach(function(p) {
+            if (!p.id || !p.title) {
+                // 数据不完整，跳过
+                skippedCount++;
+                return;
+            }
+            if (existingIds[p.id]) {
+                // 重复，跳过
+                skippedCount++;
+                return;
+            }
+            // 确保有必要的字段
+            posts.push({
+                id: p.id,
+                title: p.title || '',
+                author: p.author || '',
+                content: p.content || '',
+                publishTime: p.publishTime || p.createdAt || nowISO(),
+                createdAt: p.createdAt || nowISO(),
+                updatedAt: p.updatedAt || nowISO()
+            });
+            existingIds[p.id] = true;
+            addedCount++;
+        });
+
+        savePosts(posts);
+        renderPostList();
+        resetEditor();
+
+        var msg = '导入完成：新增 ' + addedCount + ' 条';
+        if (skippedCount > 0) msg += '，跳过 ' + skippedCount + ' 条（重复或不完整）';
+        showToast(msg, 'success');
+    }
+
+    // ==================== 事件绑定 ====================
+    $searchInput.addEventListener('input', function() {
+        currentFilter = $searchInput.value;
+        renderPostList();
+    });
+
+    $sortSelect.addEventListener('change', function() {
+        currentSort = $sortSelect.value;
+        renderPostList();
+    });
+
+    $btnSave.addEventListener('click', saveOrUpdatePost);
+
+    $btnNew.addEventListener('click', function() {
+        resetEditor();
+        renderPostList();
+    });
+
+    $btnDelete.addEventListener('click', deletePost);
+
+    $btnSetTime.addEventListener('click', updatePublishTimeOnly);
+
+    // 发布时间输入框变化时实时更新显示
+    $publishTimeInput.addEventListener('change', function() {
+        var val = $publishTimeInput.value;
+        if (val) {
+            $timeDisplay.textContent = formatTime(val);
+        }
+    });
+
+    $btnExport.addEventListener('click', exportDataset);
+
+    $btnImport.addEventListener('click', function() {
+        $importFileInput.click();
+    });
+
+    $importFileInput.addEventListener('change', function() {
+        if ($importFileInput.files && $importFileInput.files[0]) {
+            importDataset($importFileInput.files[0]);
+            $importFileInput.value = '';
+        }
+    });
+
+    $btnClearAll.addEventListener('click', clearAll);
+
+    // 全局函数：选择帖子（从卡片点击调用）
+    window._selectPost = function(postId) {
+        if (currentPostId === postId) {
+            // 再次点击同一个帖子，取消选中
+            currentPostId = null;
+            resetEditor();
+            renderPostList();
+            return;
+        }
+        loadPostToEditor(postId);
+        renderPostList();
+    };
+
+    // 键盘快捷键
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+S / Cmd+S 保存
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            e.preventDefault();
+            saveOrUpdatePost();
+        }
+        // Escape 取消编辑
+        if (e.key === 'Escape' && currentPostId) {
+            resetEditor();
+            renderPostList();
+            showToast('已取消编辑', '');
+        }
+    });
+
+    // ==================== 工具函数 ====================
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    }
+
+    function truncateText(text, maxLen) {
+        if (!text) return '（无内容）';
+        if (text.length <= maxLen) return text;
+        return text.substring(0, maxLen) + '...';
+    }
+
+    // ==================== 初始化 ====================
+    function init() {
+        // 设置发布时间默认值为当前时间
+        $publishTimeInput.value = toDatetimeLocal(nowISO());
+        $timeDisplay.textContent = formatTime(nowISO());
+        renderPostList();
+    }
+
+    init();
+
+    console.log('📊 帖子数据集管理工具已就绪');
+    console.log('   - 已加载 ' + posts.length + ' 条帖子');
+    console.log('   - 数据存储于 localStorage: ' + STORAGE_KEY);
+    console.log('   - Ctrl+S 快速保存');
+    console.log('   - Esc 取消编辑');
+})();
+</script>
+
+</body>
+</html>

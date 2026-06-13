@@ -783,11 +783,11 @@ body {
             renderPostList();
             $btnPublish.textContent = '✅ Published';
             $btnPublish.disabled = false;
-            setTimeout(function() { $btnPublish.textContent = '\u{1F504} Update on GitHub'; $btnPublish.style.display = 'none'; $btnUpdateGH.style.display = 'inline-flex'; }, 2000);
-            showToast('Published! \u{1F517} ' + post.publishedUrl, 'success');
+            setTimeout(function() { $btnPublish.textContent = '🔄 Update on GitHub'; $btnPublish.style.display = 'none'; $btnUpdateGH.style.display = 'inline-flex'; }, 2000);
+            showToast('Published! 🔗 ' + post.publishedUrl, 'success');
         } catch (e) {
             $btnPublish.disabled = false;
-            $btnPublish.textContent = '\u{1F680} Publish to GitHub';
+            $btnPublish.textContent = '🚀 Publish to GitHub';
             showToast('Publish failed: ' + e.message, 'error');
         }
     }
@@ -843,11 +843,11 @@ body {
             renderPostList();
             $btnUpdateGH.disabled = false;
             $btnUpdateGH.textContent = '✅ Updated';
-            setTimeout(function() { $btnUpdateGH.textContent = '\u{1F504} Update on GitHub'; }, 2000);
-            showToast('Updated! \u{1F517} ' + post.publishedUrl, 'success');
+            setTimeout(function() { $btnUpdateGH.textContent = '🔄 Update on GitHub'; }, 2000);
+            showToast('Updated! 🔗 ' + post.publishedUrl, 'success');
         } catch (e) {
             $btnUpdateGH.disabled = false;
-            $btnUpdateGH.textContent = '\u{1F504} Update on GitHub';
+            $btnUpdateGH.textContent = '🔄 Update on GitHub';
             showToast('Update failed: ' + e.message, 'error');
         }
     }

@@ -585,7 +585,12 @@ body {
         }
         if (sha) body.sha = sha;
 
-        var reqBody = method === 'DELETE' ? JSON.stringify({ message: body.message, sha: sha, branch: body.branch }) : JSON.stringify(body);
+        var reqBody = null;
+        if (method === 'DELETE') {
+            reqBody = JSON.stringify({ message: body.message, sha: sha, branch: body.branch });
+        } else if (method !== 'GET' && method !== 'HEAD') {
+            reqBody = JSON.stringify(body);
+        }
 
         console.log('GitHub API:', method, url, 'content size:', content ? content.length : 0, 'sha:', sha || 'none');
 

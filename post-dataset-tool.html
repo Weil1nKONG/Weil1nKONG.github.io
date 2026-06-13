@@ -1085,37 +1085,37 @@ body {
         }
         if (!post) return;
         currentPostId = post.id;
-        $panelTitle.textContent = '&#x270F;&#xFE0F; Edit Post';
+        $panelTitle.textContent = '✏️ Edit Post';
         $titleInput.value = post.title || '';
         $slugInput.value = post.slug || '';
         $authorInput.value = post.author || '';
         $contentInput.value = post.content || '';
         $publishTimeInput.value = toDatetimeLocal(post.publishTime);
         $timeDisplay.textContent = formatTime(post.publishTime);
-        $btnSave.textContent = '&#x1F4BE; Save Locally';
+        $btnSave.textContent = '💾 Save Locally';
         $btnNew.style.display = 'inline-flex';
         $editActions.style.display = 'flex';
-        $footerInfo.textContent = '&#x1F4DD; Editing: "' + truncateText(post.title, 30) + '"';
+        $footerInfo.textContent = '📝 Editing: "' + truncateText(post.title, 30) + '"';
         updatePublishedInfo(post);
         updatePublishButtons();
     }
 
     function resetEditor() {
         currentPostId = null;
-        $panelTitle.textContent = '&#x270D;&#xFE0F; New Post';
+        $panelTitle.textContent = '✍️ New Post';
         $titleInput.value = '';
         $slugInput.value = '';
         $authorInput.value = '';
         $contentInput.value = '';
         $publishTimeInput.value = toDatetimeLocal(nowISO());
         $timeDisplay.textContent = formatTime(nowISO());
-        $btnSave.textContent = '&#x1F4BE; Save Locally';
+        $btnSave.textContent = '💾 Save Locally';
         $btnNew.style.display = 'none';
         $editActions.style.display = 'none';
-        $footerInfo.textContent = '&#x1F4A1; Tip: Publish time can be edited independently from post content';
+        $footerInfo.textContent = '💡 Tip: Publish time can be edited independently from post content';
         $publishedInfo.classList.remove('visible');
         $btnPublish.style.display = 'inline-flex';
-        $btnPublish.textContent = '&#x1F680; Publish to GitHub';
+        $btnPublish.textContent = '🚀 Publish to GitHub';
         $btnPublish.disabled = false;
         $btnUpdateGH.style.display = 'none';
     }
@@ -1133,7 +1133,7 @@ body {
     function updatePublishButtons() {
         if (!currentPostId) {
             $btnPublish.style.display = 'inline-flex';
-            $btnPublish.textContent = '&#x1F680; Publish to GitHub';
+            $btnPublish.textContent = '🚀 Publish to GitHub';
             $btnPublish.disabled = false;
             $btnUpdateGH.style.display = 'none';
             return;
@@ -1145,10 +1145,10 @@ body {
         if (post && post.published) {
             $btnPublish.style.display = 'none';
             $btnUpdateGH.style.display = 'inline-flex';
-            $btnUpdateGH.textContent = '&#x1F504; Update on GitHub';
+            $btnUpdateGH.textContent = '🔄 Update on GitHub';
         } else {
             $btnPublish.style.display = 'inline-flex';
-            $btnPublish.textContent = '&#x1F680; Publish to GitHub';
+            $btnPublish.textContent = '🚀 Publish to GitHub';
             $btnPublish.disabled = false;
             $btnUpdateGH.style.display = 'none';
         }

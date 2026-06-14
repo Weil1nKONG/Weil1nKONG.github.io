@@ -11,16 +11,23 @@ body {
     background: #f9fafb; color: #2c3e50; line-height: 1.7;
 }
 h1 { color: #4f6ef6; font-size: 1.8rem; margin-bottom: 6px; }
-.subtitle { color: #7f8c8d; font-size: 1rem; margin-bottom: 30px; }
+.subtitle { color: #7f8c8d; font-size: 1rem; margin-bottom: 24px; }
+.section-label { font-size: 0.8rem; font-weight: 700; color: #7f8c8d; text-transform: uppercase; letter-spacing: 0.5px; margin: 28px 0 10px; }
 .card {
     background: #fff; border: 1px solid #e1e5ea; border-radius: 10px;
-    padding: 20px 24px; margin-bottom: 16px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
-    text-decoration: none; color: inherit; display: block; transition: 0.2s;
+    padding: 18px 22px; margin-bottom: 12px; box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    text-decoration: none; color: inherit; display: flex; justify-content: space-between; align-items: center;
+    transition: 0.2s;
 }
 .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); transform: translateY(-1px); }
-.card h2 { font-size: 1.1rem; margin: 0 0 6px 0; color: #4f6ef6; }
-.card p { margin: 0; color: #7f8c8d; font-size: 0.9rem; }
+.card-left h3 { font-size: 1rem; margin: 0; color: #4f6ef6; }
+.card-left p { margin: 4px 0 0 0; color: #7f8c8d; font-size: 0.85rem; }
+.card-right { font-size: 0.85rem; color: #7f8c8d; white-space: nowrap; }
+.group-count { color: #4f6ef6; font-weight: 700; }
+.manager-card { border-left: 4px solid #4f6ef6; }
+.group-card { border-left: 4px solid #27ae60; }
 footer { margin-top: 40px; text-align: center; font-size: 0.8rem; color: #999; }
+.loading { text-align: center; color: #7f8c8d; font-size: 0.9rem; padding: 20px; }
 </style>
 </head>
 <body>
@@ -28,19 +35,80 @@ footer { margin-top: 40px; text-align: center; font-size: 0.8rem; color: #999; }
 <h1>Weil1nKONG</h1>
 <p class="subtitle">Post dataset for GEO research</p>
 
-<a class="card" href="/post-dataset-tool.html">
-    <h2>Post Dataset Manager</h2>
-    <p>Create, edit, and publish posts with customizable timestamps. One-click deploy to this site.</p>
+<a class="card manager-card" href="/post-dataset-tool.html">
+    <div class="card-left">
+        <h3>Post Dataset Manager</h3>
+        <p>Create, edit, and publish posts with customizable timestamps</p>
+    </div>
+    <div class="card-right">Open</div>
 </a>
 
-<a class="card" href="/posts/">
-    <h2>Published Posts</h2>
-    <p>Browse all published posts grouped by category — Tech, Research, Cooking, and more.</p>
-</a>
+<p class="section-label">Published Posts by Group</p>
+
+<div id="groupCards">
+    <div class="loading">Loading groups from /posts/...</div>
+</div>
 
 <footer>
     <a href="https://github.com/Weil1nKONG/Weil1nKONG.github.io">GitHub</a>
 </footer>
+
+<script>
+(function() {
+    var $container = document.getElementById('groupCards');
+
+    fetch('/posts/')
+        .then(function(r) {
+            if (!r.ok) throw new Error('HTTP '+r.status);
+            return r.text();
+        })
+        .then(function(html) {
+            // Parse group headers: <h2>GroupName <span ...>(N posts)</span></h2>
+            var matches = html.match(/<h2>([^<]+)<\/h2>/g) || [];
+            var groups = [];
+            matches.forEach(function(m) {
+                var text = m.replace(/<[^>]*>/g, '').trim(); // strip tags
+                // text looks like "Tech (3 posts)"
+                var parts = text.match(/^(.+?)\s*\((\d+)\s*posts?\)$/);
+                if (parts) {
+                    groups.push({ name: parts[1], count: parseInt(parts[2]) });
+                } else {
+                    groups.push({ name: text, count: 0 });
+                }
+            });
+
+            if (groups.length === 0) {
+                $container.innerHTML = '<div class="card group-card" style="border-left-color:#ccc;"><div class="card-left"><h3 style="color:#7f8c8d;">No posts published yet</h3><p>Publish your first post from the Manager</p></div></div>';
+                return;
+            }
+
+            var cardsHTML = '';
+            groups.forEach(function(g) {
+                cardsHTML +=
+                    '<a class="card group-card" href="/posts/">' +
+                    '<div class="card-left">' +
+                    '<h3>' + escapeHtml(g.name) + '</h3>' +
+                    '<p>Browse posts in this category</p>' +
+                    '</div>' +
+                    '<div class="card-right"><span class="group-count">' + g.count + '</span> posts</div>' +
+                    '</a>';
+            });
+            $container.innerHTML = cardsHTML;
+        })
+        .catch(function(err) {
+            console.error('Failed to load groups:', err);
+            $container.innerHTML =
+                '<a class="card" href="/posts/">' +
+                '<div class="card-left"><h3>Published Posts</h3><p>Browse all published posts grouped by category</p></div>' +
+                '<div class="card-right">View</div>' +
+                '</a>';
+        });
+
+    function escapeHtml(str) {
+        return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+})();
+</script>
 
 </body>
 </html>

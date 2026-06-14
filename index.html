@@ -64,10 +64,10 @@ footer { margin-top: 40px; text-align: center; font-size: 0.8rem; color: #999; }
         })
         .then(function(html) {
             // Parse group headers: <h2>GroupName <span ...>(N posts)</span></h2>
-            var matches = html.match(/<h2>([^<]+)<\/h2>/g) || [];
+            var matches = html.match(/<h2>[\s\S]*?<\/h2>/g) || [];
             var groups = [];
             matches.forEach(function(m) {
-                var text = m.replace(/<[^>]*>/g, '').trim(); // strip tags
+                var text = m.replace(/<[^>]*>/g, '').trim(); // strip all HTML tags
                 // text looks like "Tech (3 posts)"
                 var parts = text.match(/^(.+?)\s*\((\d+)\s*posts?\)$/);
                 if (parts) {

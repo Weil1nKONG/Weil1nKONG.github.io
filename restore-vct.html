@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html><head><meta charset="UTF-8"><title>Restore VCT Posts</title></head>
+<body>
+<h2>Restoring VCT posts...</h2>
+<p id="status">Loading VCT data...</p>
+<script>
+var STORAGE_KEY = 'post_dataset_tool_data';
+
+fetch('vct-import.html')
+  .then(r => r.text())
+  .then(html => {
+    var m = html.match(/<script\s+type=["']application\/json["'][^>]*>([\s\S]*?)<\/script>/i);
+    if (!m) { document.getElementById('status').textContent = 'ERROR: No JSON found'; return; }
+    var vctPosts = JSON.parse(m[1]);
+
+    var existing = [];
+    try { existing = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) {}
+
+    // Remove any old VCT posts (by group)
+    existing = existing.filter(function(p) { return p.group !== 'VCT'; });
+
+    // Add VCT posts
+    var all = existing.concat(vctPosts);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+
+    document.getElementById('status').textContent = 'Done! ' + vctPosts.length + ' VCT posts restored. Total: ' + all.length + ' posts. Redirecting...';
+    setTimeout(function() { window.location.href = '/post-dataset-tool.html'; }, 1500);
+  })
+  .catch(function(e) {
+    document.getElementById('status').textContent = 'ERROR: ' + e.message;
+  });
+</script>
+</body>
+</html>
